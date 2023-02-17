@@ -55,7 +55,7 @@ class Lexer:
 
     def lex(self):
         if(self.input_index >= len(self.input_text)):
-            return Token(TokenType.END, None)
+            return (TokenType.END, None)
 
         for rule in self.regexes:
             m = re.match(rule.regex_string, self.input_text[self.input_index:])
@@ -66,9 +66,9 @@ class Lexer:
                     return self.lex()
                 else:
                     if rule.value_function is None:
-                        return Token(rule.token_type, None)
+                        return (rule.token_type, None)
                     else:
-                        return Token(rule.token_type, rule.value_function(matched_string))
+                        return (rule.token_type, rule.value_function(matched_string))
 
         raise Exception("Could not parse to end of input")
 

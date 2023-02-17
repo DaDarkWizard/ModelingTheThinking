@@ -11,8 +11,4 @@ class TokenType(Enum):
     IDENTIFIER = 6
     WHITESPACE = 7
     END = 8
-
-class Token:
-    def __init__(self, type: TokenType, value):
-        self.type = type
-        self.value = value
+    NUMBER = 9

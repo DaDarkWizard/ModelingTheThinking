@@ -1,70 +1,75 @@
 
 from typing import List, Tuple
+from lclasses import *
 
-def lisp_add(args: List[Tuple[str, any]], scope):
+def lisp_add(name: any, args: List[Tuple[str, any]], scope):
         args.reverse()
         result = args.pop()
-        assert result[0] == "NUMBER"
+        assert result[0] == TokenType.NUMBER
 
         while len(args) > 0:
             next = args.pop()
-            assert next[0] == "NUMBER"
-            result = ("NUMBER", result[1] + next[1])
+            assert next[0] == TokenType.NUMBER
+            result = (TokenType.NUMBER, result[1] + next[1])
         return result
 
 
-def lisp_sub(args: List[Tuple[str, any]], scope):
+def lisp_sub(name: any, args: List[Tuple[str, any]], scope):
         args.reverse()
         result = args.pop()
-        assert result[0] == "NUMBER"
+        assert result[0] == TokenType.NUMBER
 
         while len(args) > 0:
             next = args.pop()
-            assert next[0] == "NUMBER"
-            result = ("NUMBER", result[1] - next[1])
+            assert next[0] == TokenType.NUMBER
+            result = (TokenType.NUMBER, result[1] - next[1])
         return result
 
 
-def lisp_mult(args: List[Tuple[str, any]], scope):
+def lisp_mult(name: any, args: List[Tuple[str, any]], scope):
         args.reverse()
         result = args.pop()
-        assert result[0] == "NUMBER"
+        assert result[0] == TokenType.NUMBER
 
         while len(args) > 0:
             next = args.pop()
-            assert next[0] == "NUMBER"
-            result = ("NUMBER", result[1] * next[1])
+            assert next[0] == TokenType.NUMBER
+            result = (TokenType.NUMBER, result[1] * next[1])
         return result
 
-def lisp_div(args: List[Tuple[str, any]], scope):
+def lisp_div(name: any, args: List[Tuple[str, any]], scope):
         args.reverse()
         result = args.pop()
-        assert result[0] == "NUMBER"
+        assert result[0] == TokenType.NUMBER
 
         while len(args) > 0:
             next = args.pop()
-            assert next[0] == "NUMBER"
-            result = ("NUMBER", result[1] / next[1])
+            assert next[0] == TokenType.NUMBER
+            result = (TokenType.NUMBER, result[1] / next[1])
         return result
 
-def lisp_divi(args: List[Tuple[str, any]], scope):
+def lisp_divi(name: any, args: List[Tuple[str, any]], scope):
         args.reverse()
         result = args.pop()
-        assert result[0] == "NUMBER"
+        assert result[0] == TokenType.NUMBER
 
         while len(args) > 0:
             next = args.pop()
-            assert next[0] == "NUMBER"
-            result = ("NUMBER", result[1] // next[1])
+            assert next[0] == TokenType.NUMBER
+            result = (TokenType.NUMBER, result[1] // next[1])
         return result
 
-def lisp_mod(args: List[Tuple[str, any]], scope):
+def lisp_mod(name: any, args: List[Tuple[str, any]], scope):
         args.reverse()
         result = args.pop()
-        assert result[0] == "NUMBER"
+        assert result[0] == TokenType.NUMBER
 
         while len(args) > 0:
             next = args.pop()
-            assert next[0] == "NUMBER"
-            result = ("NUMBER", result[1] % next[1])
+            assert next[0] == TokenType.NUMBER
+            result = (TokenType.NUMBER, result[1] % next[1])
         return result
+
+#def lisp_cons()
+
+#def create_func(name: any, args: List[Tuple[str, any]], scope)

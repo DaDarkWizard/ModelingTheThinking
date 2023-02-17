@@ -1,27 +1,11 @@
 from llexer import *
 from typing import Dict, Callable, List, Tuple
 from lisp_functions import *
+from lclasses import *
 
 class Parser:
     def __init__(self):
         self.lexer: Lexer = Lexer()
-
-
-class Scope:
-    def __init__(self, parent = None):
-        self.parent = parent
-        self.functions : Dict[any, Callable[[List[Tuple[str, any]], Scope], Tuple[str, any]]] = dict()
-        self.stack: List[Tuple[str, any]] = list()
-        self.parentheses_count = 0
-        
-    def call_func(self, name: any, args: List[Tuple[str, any]]):
-        if name in self.functions:
-            return self.functions[name](args, self)
-        elif isinstance(self.parent, Scope):
-            ret_val: Tuple[str, any] = self.parent.call_func(name, args)
-            return ret_val
-        else:
-            return None
 
 
 class LispParser(Parser):
@@ -29,6 +13,7 @@ class LispParser(Parser):
     def __init__(self):
         Parser.__init__(self)
         self.lexer = LispLexer()
+        self.set_input("")
 
 
     def set_input(self, input: str):
@@ -45,21 +30,60 @@ class LispParser(Parser):
         self.lexer.set_input(input)
     
     def parse(self):
-        tok = self.lexer.lex()
+        toks = self.lexer.lex_all()
 
-        while tok.type != TokenType.END:
-            match tok.type:
+        toks.reverse()
+
+        self.parse_stack(toks)
+
+        
+    
+    def parse_stack(self, input: list):
+        tok = input.pop()
+
+        while True:
+            match tok[0]:
                 case TokenType.STRING:
-                    self.scope.stack.append(("STRING", tok.value))
+                    self.scope.stack.append((TokenType.STRING, tok[1]))
+                case TokenType.NUMBER:
+                    self.scope.stack.append((TokenType.NUMBER, tok[1]))
                 case TokenType.INTEGER:
-                    self.scope.stack.append(("NUMBER", tok.value))
+                    self.scope.stack.append((TokenType.NUMBER, tok[1]))
                 case TokenType.FLOAT:
-                    self.scope.stack.append(("NUMBER", tok.value))
+                    self.scope.stack.append((TokenType.NUMBER, tok[1]))
                 case TokenType.LEFT_PARENTHESES:
-                    self.scope.stack.append(("L_PAREN", None))
+                    self.scope.stack.append((TokenType.LEFT_PARENTHESES, None))
                     self.scope.parentheses_count += 1
                 case TokenType.IDENTIFIER:
-                    self.scope.stack.append(("IDENTIFIER", tok.value))
+                    self.scope.stack.append((TokenType.IDENTIFIER, tok[1]))
+                    if tok[1] == "defun":
+                        self.scope.stack.pop()
+                        self.scope.stack.pop()
+                        self.scope.parentheses_count -= 1
+                        paren_count = 1
+                        def_stack = list()
+                        while paren_count > 0:
+                            assert len(input) > 0, "Missing close at end of function definition"
+                            def_stack.append(input.pop())
+                            if def_stack[-1][0] == TokenType.LEFT_PARENTHESES:
+                                paren_count += 1
+                            elif def_stack[-1][0] == TokenType.RIGHT_PARENTHESES:
+                                paren_count -= 1
+                        def_stack.pop()
+                        def_stack.reverse()
+                        new_func_name = def_stack.pop()
+                        assert new_func_name[0] != TokenType.LEFT_PARENTHESES and \
+                                new_func_name[0] != TokenType.RIGHT_PARENTHESES, "Invalid function definition."
+                        new_func_args = list()
+                        assert def_stack.pop()[0] == TokenType.LEFT_PARENTHESES, "Invalid function definition."
+                        new_func_args.append(def_stack.pop())
+                        while new_func_args[-1][0] != TokenType.RIGHT_PARENTHESES:
+                            new_func_args.append(def_stack.pop())
+                        new_func_args.pop()
+                        new_func_args = list(map(lambda x: x[1], new_func_args))
+                        new_func = LispFunction(new_func_name[1], new_func_args, def_stack)
+                        self.scope.add_func(new_func)
+
                 case TokenType.RIGHT_PARENTHESES:
                     self.scope.parentheses_count -= 1
                     if self.scope.parentheses_count < 0:
@@ -67,7 +91,7 @@ class LispParser(Parser):
                     
                     args: Tuple[str, any] = list()
 
-                    while self.scope.stack[-1][0] != "L_PAREN":
+                    while self.scope.stack[-1][0] != TokenType.LEFT_PARENTHESES:
                         args.append(self.scope.stack.pop())
                     
                     self.scope.stack.pop()
@@ -78,16 +102,22 @@ class LispParser(Parser):
 
                     ret_val = self.scope.call_func(func_name[1], args)
 
-                    self.scope.stack.append(ret_val)
+                    if ret_val is not None:
+                        self.scope.stack.append(ret_val)
 
                 case _:
                     raise Exception("Unknown token type.")
             
-            tok = self.lexer.lex()
+            if len(input) == 0:
+                break
+            else:
+                tok = input.pop()
         
-        print(self.scope.stack)
+        assert self.scope.parentheses_count == 0, "Incomplete ending parentheses!"
+        
 
-ti = LispParser()
-
-ti.set_input("(+ (- 6 7) 3)")
-ti.parse()
+    def parse_input(self, input: str):
+        self.add_input(input)
+        self.parse()
+        if len(self.scope.stack) > 0:
+            print(self.scope.stack.pop())
