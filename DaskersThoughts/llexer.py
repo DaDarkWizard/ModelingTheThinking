@@ -42,6 +42,7 @@ class Lexer:
         self.input_text = ""
         self.input_index = 0
         self.regexes: List[LexRule] = list()
+        self.end_token = None
     
 
     def set_input(self, input: str):
@@ -53,6 +54,9 @@ class Lexer:
         self.regexes.append(new_rule)
 
     def lex(self):
+        if(self.input_index >= len(self.input_text)):
+            return Token(TokenType.END, None)
+
         for rule in self.regexes:
             m = re.match(rule.regex_string, self.input_text[self.input_index:])
             if m is not None:
@@ -66,7 +70,7 @@ class Lexer:
                     else:
                         return Token(rule.token_type, rule.value_function(matched_string))
 
-        return None
+        raise Exception("Could not parse to end of input")
 
     def lex_all(self):
 
@@ -88,14 +92,8 @@ class LispLexer(Lexer):
         self.add_regex(LexRule(r'\s+', None, None, skip=True))
         self.add_regex(LexRule(r'\(', TokenType.LEFT_PARENTHESES, None))
         self.add_regex(LexRule(r'\)', TokenType.RIGHT_PARENTHESES, None))
-        self.add_regex(LexRule(r'[1-9][0-9]*\s', TokenType.INTEGER, lambda x: int(x)))
-        self.add_regex(LexRule(r'[0-9]+\.[0-9]+\s', TokenType.FLOAT, lambda x: float(x)))
+        self.add_regex(LexRule(r'[1-9][0-9]*(?=[\s\)])', TokenType.INTEGER, lambda x: int(x)))
+        self.add_regex(LexRule(r'[0-9]+\.[0-9]+(?=[\s\)])', TokenType.FLOAT, lambda x: float(x)))
         self.add_regex(LexRule(r'\"(\\\"|[^\"])*\"|\'(\\\'|[^\'])*\'', TokenType.STRING, lambda x: x[1:-1]))
-        self.add_regex(LexRule(r'[^\s\)]+', TokenType.IDENTIFIER, lambda x: f"'{x}'"))
-        
+        self.add_regex(LexRule(r'[^\s\)]+', TokenType.IDENTIFIER, lambda x: x))
 
-te = LispLexer()
-te.set_input("(this is a test)")
-
-
-print(list(map(lambda x: x.type, te.lex_all() )))

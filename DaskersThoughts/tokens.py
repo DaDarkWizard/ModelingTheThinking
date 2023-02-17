@@ -10,6 +10,7 @@ class TokenType(Enum):
     STRING = 5
     IDENTIFIER = 6
     WHITESPACE = 7
+    END = 8
 
 class Token:
     def __init__(self, type: TokenType, value):
