@@ -2,6 +2,11 @@ from llexer import *
 from typing import Dict, Callable, List, Tuple
 from lisp_functions import *
 from lclasses import *
+from ldefun import lisp_defun
+from lcond import lisp_cond
+from lif import lisp_if
+from lwhen import lisp_when
+from lcase import lisp_case
 
 class Parser:
     def __init__(self):
@@ -87,32 +92,15 @@ class LispParser(Parser):
                 case TokenType.IDENTIFIER:
                     self.scope.stack.append((TokenType.IDENTIFIER, tok[1]))
                     if tok[1] == "defun":
-                        self.scope.stack.pop()
-                        self.scope.stack.pop()
-                        self.scope.parentheses_count -= 1
-                        paren_count = 1
-                        def_stack = list()
-                        while paren_count > 0:
-                            assert len(input) > 0, "Missing close at end of function definition"
-                            def_stack.append(input.pop())
-                            if def_stack[-1][0] == TokenType.LEFT_PARENTHESES:
-                                paren_count += 1
-                            elif def_stack[-1][0] == TokenType.RIGHT_PARENTHESES:
-                                paren_count -= 1
-                        def_stack.pop()
-                        def_stack.reverse()
-                        new_func_name = def_stack.pop()
-                        assert new_func_name[0] != TokenType.LEFT_PARENTHESES and \
-                                new_func_name[0] != TokenType.RIGHT_PARENTHESES, "Invalid function definition."
-                        new_func_args = list()
-                        assert def_stack.pop()[0] == TokenType.LEFT_PARENTHESES, "Invalid function definition."
-                        new_func_args.append(def_stack.pop())
-                        while new_func_args[-1][0] != TokenType.RIGHT_PARENTHESES:
-                            new_func_args.append(def_stack.pop())
-                        new_func_args.pop()
-                        new_func_args = list(map(lambda x: x[1], new_func_args))
-                        new_func = LispFunction(new_func_name[1], new_func_args, def_stack)
-                        self.scope.add_func(new_func)
+                        lisp_defun(self, input)
+                    elif tok[1] == "cond":
+                        lisp_cond(self, input)
+                    elif tok[1] == "if":
+                        lisp_if(self, input)
+                    elif tok[1] == "when":
+                        lisp_when(self, input)
+                    elif tok[1] == "case":
+                        lisp_case(self, input)
 
                 case TokenType.RIGHT_PARENTHESES:
                     self.scope.parentheses_count -= 1
@@ -130,10 +118,16 @@ class LispParser(Parser):
 
                     args.reverse()
 
-                    ret_val = self.scope.call_func(func_name[1], args)
+                    if self.scope.func_exists(func_name[1]):
 
-                    if ret_val is not None:
-                        self.scope.stack.append(ret_val)
+                        ret_val = self.scope.call_func(func_name[1], args)
+
+                        if ret_val is not None:
+                            self.scope.stack.append(ret_val)
+                    elif func_name[0] == TokenType.IDENTIFIER:
+                        raise Exception(f"Invalid function call '{func_name[1]}'")
+                    else:
+                        self.scope.stack.append(func_name)
 
                 case _:
                     raise Exception("Unknown token type.")

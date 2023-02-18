@@ -246,6 +246,8 @@ def lisp_print(name: any, args: List[Tuple[str, any]], scope):
 
     print(lisp_atom_to_str(args[0]))
 
+    return (TokenType.NIL, None)
+
 def lisp_defconstant(name: any, args: List[Tuple[str, any]], scope):
     assert len(args) == 2, "Two args for defconstant"
 

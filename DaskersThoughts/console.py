@@ -1,4 +1,5 @@
 from lparser import LispParser
+import traceback
 
 parser = LispParser()
 
@@ -11,5 +12,5 @@ while True:
     try:
         parser.parse_input(test)
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         parser.recover()
