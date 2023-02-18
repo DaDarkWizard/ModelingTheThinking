@@ -12,3 +12,6 @@ class TokenType(Enum):
     WHITESPACE = 7
     END = 8
     NUMBER = 9
+    CONS = 10
+    NIL = 11
+    TRUE = 12

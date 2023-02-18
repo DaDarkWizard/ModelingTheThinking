@@ -95,5 +95,6 @@ class LispLexer(Lexer):
         self.add_regex(LexRule(r'[1-9][0-9]*(?=[\s\)])', TokenType.INTEGER, lambda x: int(x)))
         self.add_regex(LexRule(r'[0-9]+\.[0-9]+(?=[\s\)])', TokenType.FLOAT, lambda x: float(x)))
         self.add_regex(LexRule(r'\"(\\\"|[^\"])*\"|\'(\\\'|[^\'])*\'', TokenType.STRING, lambda x: x[1:-1]))
+        self.add_regex(LexRule(r'[nN][iI][lL](?=[^\s]|\))', TokenType.NIL, None))
         self.add_regex(LexRule(r'[^\s\)]+', TokenType.IDENTIFIER, lambda x: x))
 

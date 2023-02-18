@@ -17,7 +17,6 @@ class LispParser(Parser):
 
 
     def set_input(self, input: str):
-        self.lexer.set_input(input)
         self.scope = Scope(None)
         self.scope.functions["+"] = lisp_add
         self.scope.functions["-"] = lisp_sub
@@ -25,6 +24,18 @@ class LispParser(Parser):
         self.scope.functions["/"] = lisp_div
         self.scope.functions["//"] = lisp_divi
         self.scope.functions["%"] = lisp_mod
+        self.scope.functions["print"] = lisp_print
+        self.scope.functions["cons"] = lisp_cons
+        self.scope.functions["car"] = lisp_car
+        self.scope.functions["cdr"] = lisp_cdr
+        self.scope.functions["reverse"] = lisp_reverse
+        self.scope.functions["list"] = lisp_list
+        self.scope.functions["append"] = lisp_append
+        self.scope.functions["last"] = lisp_last
+        self.scope.functions["="] = lisp_equal
+        self.scope.functions["member"] = lisp_member
+
+        self.lexer.set_input(input)
     
     def add_input(self, input: str):
         self.lexer.set_input(input)
@@ -51,6 +62,8 @@ class LispParser(Parser):
                     self.scope.stack.append((TokenType.NUMBER, tok[1]))
                 case TokenType.FLOAT:
                     self.scope.stack.append((TokenType.NUMBER, tok[1]))
+                case TokenType.NIL:
+                    self.scope.stack.append((TokenType.NIL, None))
                 case TokenType.LEFT_PARENTHESES:
                     self.scope.stack.append((TokenType.LEFT_PARENTHESES, None))
                     self.scope.parentheses_count += 1
@@ -120,4 +133,6 @@ class LispParser(Parser):
         self.add_input(input)
         self.parse()
         if len(self.scope.stack) > 0:
-            print(self.scope.stack.pop())
+            args = list()
+            args.append(self.scope.stack.pop())
+            lisp_print("print", args, self.scope)
