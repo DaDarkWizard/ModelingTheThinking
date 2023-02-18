@@ -9,6 +9,8 @@ class Scope:
         self.parentheses_count = 0
         self.defer_execution = False
         self.defer_parentheses_count = 0
+        self.constants = dict()
+        
         
     def call_func(self, name: any, args: List[Tuple[str, any]]):
         if name in self.functions:
@@ -17,19 +19,39 @@ class Scope:
             ret_val: Tuple[str, any] = self.parent.call_func(name, args)
             return ret_val
         else:
-            return None
+            raise Exception(f"Function {name} does not exist")
     
     def func_exists(self, name: any):
         if name in self.functions:
             return True
         elif isinstance(self.parent, Scope):
-            ret_val: bool = self.parent.func_exists()
+            ret_val: bool = self.parent.func_exists(name)
             return ret_val
         else:
             return False
     
+    def constant_exists(self, name: any):
+        if name in self.constants:
+            return True
+        elif isinstance(self.parent, Scope):
+            return self.parent.constant_exists(name)
+
     def add_func(self, func):
         self.functions[func.name] = func.call_function
+
+    def add_constant(self, name, value):
+        if isinstance(self.parent, Scope):
+            self.parent.add_constant(name, value)
+        else:
+            self.constants[name] = value
+    
+    def get_constant(self, name):
+        if name in self.constants:
+            return self.constants[name]
+        elif isinstance(self.parent, Scope):
+            return self.parent.get_constant(self, name)
+        else:
+            raise Exception(f"Constant {name} does not exist")
 
 class LispFunction:
     def __init__(self, name:any, args: list, stack: list):

@@ -23,7 +23,8 @@ class LispParser(Parser):
         self.scope.functions["*"] = lisp_mult
         self.scope.functions["/"] = lisp_div
         self.scope.functions["//"] = lisp_divi
-        self.scope.functions["%"] = lisp_mod
+        self.scope.functions["mod"] = lisp_mod
+        self.scope.functions["rem"] = lisp_mod
         self.scope.functions["print"] = lisp_print
         self.scope.functions["cons"] = lisp_cons
         self.scope.functions["car"] = lisp_car
@@ -33,7 +34,23 @@ class LispParser(Parser):
         self.scope.functions["append"] = lisp_append
         self.scope.functions["last"] = lisp_last
         self.scope.functions["="] = lisp_equal
+        self.scope.functions["/="] = lisp_neq
+        self.scope.functions[">"] = lisp_greaterthan
+        self.scope.functions["<"] = lisp_lessthan
+        self.scope.functions[">="] = lisp_greaterorequal
+        self.scope.functions["<="] = lisp_lessthanorequal
+        self.scope.functions["max"] = lisp_max
+        self.scope.functions["min"] = lisp_min
+        self.scope.functions["and"] = lisp_and
+        self.scope.functions["or"] = lisp_or
+        self.scope.functions["not"] = lisp_not
+        self.scope.functions["logand"] = lisp_logand
+        self.scope.functions["logior"] = lisp_logior
+        self.scope.functions["logxor"] = lisp_logxor
+        self.scope.functions["lognor"] = lisp_lognor
+        self.scope.functions["logeqv"] = lisp_logeqv
         self.scope.functions["member"] = lisp_member
+        self.scope.functions["defconstant"] = lisp_defconstant
 
         self.lexer.set_input(input)
     
@@ -121,6 +138,9 @@ class LispParser(Parser):
                 case _:
                     raise Exception("Unknown token type.")
             
+            if len(self.scope.stack) > 0 and self.scope.constant_exists(self.scope.stack[-1][1]):
+                self.scope.stack.append(self.scope.get_constant(self.scope.stack.pop()[1]))
+
             if len(input) == 0:
                 break
             else:
@@ -136,3 +156,7 @@ class LispParser(Parser):
             args = list()
             args.append(self.scope.stack.pop())
             lisp_print("print", args, self.scope)
+    
+    def recover(self):
+        self.lexer.set_input("")
+        self.scope.stack.clear()

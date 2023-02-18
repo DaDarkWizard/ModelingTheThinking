@@ -246,7 +246,159 @@ def lisp_print(name: any, args: List[Tuple[str, any]], scope):
 
     print(lisp_atom_to_str(args[0]))
 
-    
+def lisp_defconstant(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) == 2, "Two args for defconstant"
 
+    scope.add_constant(args[0][1], args[1])
+
+def lisp_neq(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) > 1, "Comparison requires at least 2 args"
+
+    for i in range(len(args)):
+        for j in range(len(args)):
+            if i == j:
+                continue
+            else:
+                new_args = list()
+                new_args.append(args[i])
+                new_args.append(args[j])
+                if lisp_equal("=", new_args, scope):
+                    return (TokenType.NIL, None)
+    
+    return (TokenType.TRUE, None)
+
+def lisp_greaterthan(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) > 1, "Comparison requires at least 2 args"
+
+    for i in range(len(args) - 1):
+        if args[i][1] <= args[i + 1][1]:
+            return (TokenType.NIL, None)
+
+    return (TokenType.TRUE, None)
+
+def lisp_lessthan(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) > 1, "Comparison requires at least 2 args"
+
+    for i in range(len(args) - 1):
+        if args[i][1] >= args[i + 1][1]:
+            return (TokenType.NIL, None)
+
+    return (TokenType.TRUE, None)
+
+def lisp_greaterorequal(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) > 1, "Comparison requires at least 2 args"
+
+    for i in range(len(args) - 1):
+        if args[i][1] < args[i + 1][1]:
+            return (TokenType.NIL, None)
+
+    return (TokenType.TRUE, None)
+
+def lisp_lessthanorequal(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) > 1, "Comparison requires at least 2 args"
+
+    for i in range(len(args) - 1):
+        if args[i][1] > args[i + 1][1]:
+            return (TokenType.NIL, None)
+
+    return (TokenType.TRUE, None)
+
+def lisp_max(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) > 1, "Comparison requires at least 2 args"
+
+    ret_result = args[0]
+
+    for i in range(1, len(args)):
+        if ret_result[1] < args[i][1]:
+            ret_result = args[i]
+
+    return ret_result
+
+def lisp_min(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) > 1, "Comparison requires at least 2 args"
+
+    ret_result = args[0]
+
+    for i in range(1, len(args)):
+        if ret_result[1] > args[i][1]:
+            ret_result = args[i]
+
+    return ret_result
+
+def lisp_and(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) > 1, "Comparison requires at least 2 args"
+
+    for i in range(len(args)):
+        if args[i][0] == TokenType.NIL:
+            return args[i]
+    
+    return args[-1]
+
+def lisp_or(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) > 1, "Comparison requires at least 2 args"
+
+    for i in range(len(args)):
+        if args[i][0] != TokenType.NIL:
+            return args[i]
+    
+    return (TokenType.NIL, None)
+
+def lisp_not(name: any, args: List[Tuple[str, any]], scope):
+    assert len(args) == 1, "Not requires 1 arg"
+
+    if args[0][0] == TokenType.NIL:
+        return (TokenType.TRUE, None)
+    else:
+        return (TokenType.NIL, None)
+
+def lisp_logand(name: any, args: List[Tuple[str, any]], scope):
+
+    ret_val = -1
+
+    for i in range(len(args)):
+        assert args[i][0] == TokenType.NUMBER
+        ret_val &= args[i][1]
+    
+    return (TokenType.NUMBER, ret_val)
+
+def lisp_logior(name: any, args: List[Tuple[str, any]], scope):
+
+    ret_val = 0
+
+    for i in range(len(args)):
+        assert args[i][0] == TokenType.NUMBER
+        ret_val |= args[i][1]
+    
+    return (TokenType.NUMBER, ret_val)
+
+def lisp_logxor(name: any, args: List[Tuple[str, any]], scope):
+
+    ret_val = 0
+
+    for i in range(len(args)):
+        assert args[i][0] == TokenType.NUMBER
+        ret_val ^= args[i][1]
+    
+    return (TokenType.NUMBER, ret_val)
+
+def lisp_lognor(name: any, args: List[Tuple[str, any]], scope):
+
+    ret_val = -1
+
+    for i in range(len(args)):
+        assert args[i][0] == TokenType.NUMBER
+        ret_val = (ret_val | args[i][1]) ^ -1
+    
+    return (TokenType.NUMBER, ret_val)
+
+def lisp_logeqv(name: any, args: List[Tuple[str, any]], scope):
+
+    ret_val = -1
+
+    for i in range(len(args)):
+        assert args[i][0] == TokenType.NUMBER
+        ret_val = (ret_val ^ args[i][1]) ^ -1
+    
+    return (TokenType.NUMBER, ret_val)
 
 #def create_func(name: any, args: List[Tuple[str, any]], scope)
