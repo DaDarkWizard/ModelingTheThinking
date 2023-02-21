@@ -1,4 +1,4 @@
-from llexer import *
+from cmllexer import *
 from typing import Dict, Callable, List, Tuple
 from lisp_functions import *
 from lclasses import *
@@ -6,7 +6,6 @@ from ldefun import lisp_defun
 from lcond import lisp_cond
 from lif import lisp_if
 from lwhen import lisp_when
-from lcase import lisp_case
 
 class Parser:
     def __init__(self):
@@ -99,8 +98,6 @@ class LispParser(Parser):
                         lisp_if(self, input)
                     elif tok[1] == "when":
                         lisp_when(self, input)
-                    elif tok[1] == "case":
-                        lisp_case(self, input)
 
                 case TokenType.RIGHT_PARENTHESES:
                     self.scope.parentheses_count -= 1

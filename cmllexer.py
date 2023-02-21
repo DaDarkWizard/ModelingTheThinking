@@ -85,7 +85,7 @@ class Lexer:
 
         return token_list
 
-class LispLexer(Lexer):
+class CMLLexer(Lexer):
     def __init__(self):
         Lexer.__init__(self)
 
