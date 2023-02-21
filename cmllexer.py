@@ -88,8 +88,19 @@ class Lexer:
 class CMLLexer(Lexer):
     def __init__(self):
         Lexer.__init__(self)
-
         self.add_regex(LexRule(r'\s+', None, None, skip=True))
+        
+        self.add_regex(LexRule(r'defRelation', TokenType.DEF_RELATION, None))
+        self.add_regex(LexRule(r'defQuantityFunction', TokenType.DEF_QUANTITY_FUNCTION, None))
+        self.add_regex(LexRule(r'defModelFragment', TokenType.DEF_MODEL_FRAGMENT, None))
+        self.add_regex(LexRule(r'defEntity', TokenType.DEF_ENTITY, None))
+        self.add_regex(LexRule(r'defDimension', TokenType.DEF_DIMENSION, None))
+        self.add_regex(LexRule(r'defUnit', TokenType.DEF_UNIT, None))
+        self.add_regex(LexRule(r'defConstantQuantity', TokenType.DEF_CONSTANT_QUANTITY, None))
+        self.add_regex(LexRule(r'defScenario', TokenType.DEF_SCENARIO, None))
+
+
+
         self.add_regex(LexRule(r'\(', TokenType.LEFT_PARENTHESES, None))
         self.add_regex(LexRule(r'\)', TokenType.RIGHT_PARENTHESES, None))
         self.add_regex(LexRule(r'[1-9][0-9]*(?=[\s\)]|$)', TokenType.INTEGER, lambda x: int(x)))
@@ -98,3 +109,15 @@ class CMLLexer(Lexer):
         self.add_regex(LexRule(r'[nN][iI][lL](?=[^\s]|\))', TokenType.NIL, None))
         self.add_regex(LexRule(r'[^\s\)]+', TokenType.IDENTIFIER, lambda x: x))
 
+
+
+#
+#(defRelation contents (?x ?y)
+# :=> (and (container ?x)
+# (contained-stuff ?y))
+# :<=> (contained-in ?y ?x))
+#
+# (=> (contents "box" "spoons") (and (container ?x) (contained-stuff ?y)) )
+#
+#
+#
