@@ -1,4 +1,4 @@
-from cmltokens import *
+from tokens import *
 from lclasses import *
 
 def lisp_defun(parser, stack):

@@ -1,4 +1,4 @@
-from cmltokens import *
+from tokens import *
 
 # Allows type hinting for lambda functions
 from typing import Callable

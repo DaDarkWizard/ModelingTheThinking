@@ -1,5 +1,5 @@
 from typing import Dict, Callable, List, Tuple
-from cmltokens import *
+from tokens import *
 
 class Scope:
     def __init__(self, parent = None):
