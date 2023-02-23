@@ -1,4 +1,9 @@
-import lis
+import cmlparser
 import sys
 
-print("Hello world")
+input_text = open("CML/dimensionstest.cml").read()
+parser = cmlparser.CMLParser()
+parser.reset()
+parser.parse_string(input_text)
+
+print("done")

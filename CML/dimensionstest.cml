@@ -1,0 +1,2 @@
+(defDimension length-dimension)
+(defDimension area-dimension :documentation "Square footage perhaps?" := (expt length-dimension 2))

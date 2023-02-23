@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Tuple
 
 class Relation:
     def __init__(self, name: str, args: List[str], documentation: str = "",
@@ -31,7 +31,7 @@ class QuantityFunction:
 
 class ModelFragment:
     def __init__(self, name : str, documentation : str = "", sub_class_of = object,
-                participants : List[(int, str)] = [], conditions : str = "", quantities : List[(int, str)] = [],
+                participants : List[Tuple[int, str]] = [], conditions : str = "", quantities : List[Tuple[int, str]] = [],
                 attributes : List[str] = [], consequences : str = ""):
         self.name = name
         self.documentation = documentation
@@ -45,7 +45,7 @@ class ModelFragment:
 
 class Entity:
     def __init__(self, name: str, documentation: str = "", sub_class_of = object, 
-                 quantities: List[(int, str)] = [], attributes: List[str] = [], consequences: str = ""):
+                 quantities: List[Tuple[int, str]] = [], attributes: List[str] = [], consequences: str = ""):
         self.name = name
         self.documentation = documentation
         self.sub_class_of = sub_class_of
@@ -54,7 +54,7 @@ class Entity:
         self.consequences = consequences
     
 class Dimension:
-    def __init__(self, name : str, documentation : str = "", dimension = lambda args : 0): 
+    def __init__(self, name : str, documentation : str = "", dimension = dict()): 
         self.name = name
         self.documentation = documentation
         self.dimension = dimension
