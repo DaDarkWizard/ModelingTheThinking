@@ -8,3 +8,4 @@ class CMLScope:
         self.stack: List[Tuple[TokenType, any]] = list()
         #self.base_dimensions
         self.dimensions: Dict[str, Dimension] = dict()
+        self.units: Dict[str, Unit] = dict()

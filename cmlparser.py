@@ -3,13 +3,20 @@ from typing import List, Tuple
 from cmltokens import *
 from cmlscope import *
 from stackhelpers import *
-import cmldimension
 
 class CMLParser:
+    def parse_dimension(self, stack):
+        from cmldimension import parse_dimension
+        parse_dimension(self, stack)
+
+    def parse_unit(self, stack):
+        from cmlunit import parse_unit
+        parse_unit(self, stack)
+
     def __init__(self):
         self.input = ""
         self.lexer = CMLLexer()
-        self.scope = CMLScope()
+        self.scope: CMLScope = CMLScope()
 
     def reset(self):
         self.scope = CMLScope()
@@ -48,7 +55,11 @@ class CMLParser:
             if tok[0] == TokenType.DEF_DIMENSION:
                 self.scope.stack.pop()
                 dimension_stack = get_rest_of_parentheses(input_stack)
-                cmldimension.parse_dimension(self, dimension_stack)
+                self.parse_dimension(dimension_stack)
+            elif tok[0] == TokenType.DEF_UNIT:
+                self.scope.stack.pop()
+                unit_stack = get_rest_of_parentheses(input_stack)
+                #cmlunit.parse_unit(self, unit_stack)
             else:
                 self.scope.stack.append(tok[0])
 

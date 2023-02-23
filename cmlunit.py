@@ -1,35 +1,34 @@
 from stackhelpers import *
-from cmlclasses import Dimension
-import cmlparser
+from cmlclasses import Unit
+from cmlparser import CMLParser
+from typing import List, Tuple
+from cmltokens import *
 
-def parse_dimension(parser: cmlparser.CMLParser, stack):
+
+def parse_unit(parser: CMLParser, stack: List[Tuple[TokenType, any]]):
     """[summary]
 
-        Parses a stack containing a dimension description.
+        Parses a stack containing a unit description.
 
-        The stack will come in without the first parentheses or def-dimension.
+        The stack will come in without the first parentheses or defUnit.
 
         ### Parameters
         1. parser: CMLParser
            - The cml parser we are using.
         2. stack: List[Tuple[TokenType, any]]
-           - The stack to parse the dimension from.
+           - The stack to parse the unit from.
     """
 
     tok = stack.pop()
-    assert tok[0] == TokenType.IDENTIFIER, "Dimension given without a name"
-    new_dim = Dimension(tok[1])
-    assert new_dim.name not in parser.scope.dimensions, f"Dimension {new_dim.name} already exists"
+    assert tok[0] == TokenType.IDENTIFIER, "Unit given without a name"
+    new_unit = Unit(tok[1])
+    assert new_unit.name not in parser.scope.units, f"Dimension {new_unit.name} already exists"
     tok = stack.pop()
-
-    if tok[0] == TokenType.DOCUMENTATION_ATTRIBUTE:
-        tok = stack.pop()
-        assert tok[0] == TokenType.STRING, "Documentation attribute given without string"
-        new_dim.documentation = tok[1]
-        tok = stack.pop()
     
-    if tok[0] == TokenType.RIGHT_PARENTHESES:
-        new_dim.dimension[new_dim.name] = 1
+    if tok[0] == TokenType.DIMENSION_ATTRIBUTE:
+        tok = stack.pop()
+        assert tok[1] in parser.scope.dimensions, "Dimension supplied does not exist"
+        new_unit.dimension[new_unit.name] = 1
         parser.scope.dimensions[new_dim.name] = new_dim
     else:
         assert tok[0] == TokenType.ASSIGNMENT_ATTRIBUTE, "Invalid dimension expression"
@@ -56,7 +55,7 @@ def parse_dimension(parser: cmlparser.CMLParser, stack):
     
     return
 
-def parse_dimension_expression(parser, stack):
+def parse_unit_expression(parser, stack):
 
     working_stack = list()
     paren_count = 0
@@ -85,7 +84,7 @@ def parse_dimension_expression(parser, stack):
             elif arg1[0] == TokenType.LEFT_PARENTHESES:
                 working_stack.append(arg2)
                 continue
-
+            
             func = working_stack.pop()
             if func[0] == TokenType.STAR:
                 for name, value in arg2[1].items():

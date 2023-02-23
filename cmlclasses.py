@@ -65,6 +65,7 @@ class Dimension:
             x += ")"
             return x
         else:
+            x += " := "
             dim_items = list(self.dimension.items())
             paren_count = 0
             for i in range(len(dim_items)):
@@ -90,6 +91,12 @@ class Unit:
         self.documentation = documentation
         self.quantity_expression = quantity_expression
         self.dimension = dimension
+        self.base_unit: bool = False
+
+class ModelValue:
+    def __init__(self):
+        self.quantity = 0
+        self.dimension = dict()
 
 
 class ConstantQuantity:
