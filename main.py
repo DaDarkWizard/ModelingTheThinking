@@ -6,4 +6,6 @@ parser = cmlparser.CMLParser()
 parser.reset()
 parser.parse_string(input_text)
 
-print("done")
+x = list(map(lambda x: x.to_string(), list(parser.scope.dimensions.values())))
+
+print(x)

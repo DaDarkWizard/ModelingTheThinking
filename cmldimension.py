@@ -15,7 +15,7 @@ def parse_dimension(parser, stack):
            - The cml parser we are using.
         2. stack: List[Tuple[TokenType, any]]
            - The stack to parse the dimension from.
-        """
+    """
 
     tok = stack.pop()
     assert tok[0] == TokenType.IDENTIFIER, "Dimension given without a name"
@@ -30,6 +30,7 @@ def parse_dimension(parser, stack):
         tok = stack.pop()
     
     if tok[0] == TokenType.RIGHT_PARENTHESES:
+        new_dim.dimension[new_dim.name] = 1
         parser.scope.dimensions[new_dim.name] = new_dim
     else:
         assert tok[0] == TokenType.ASSIGNMENT_ATTRIBUTE, "Invalid dimension expression"
@@ -64,14 +65,15 @@ def parse_dimension_expression(parser, stack):
     def identifier_to_dimension(id):
         assert id[0] == TokenType.IDENTIFIER, "Invalid dimension given"
         assert id[1] in parser.scope.dimensions, "Undefined dimension in dimension definision"
-        dim_value = dict()
-        dim_value[id[1]] = 1
-        return (TokenType.DIMENSION_VALUE, dim_value)
+        #dim_value = dict()
+        #dim_value[id[1]] = 1
+        return (TokenType.DIMENSION_VALUE, parser.scope.dimensions[id[1]].dimension.copy())
 
     while len(stack) > 0:
         tok = stack.pop()
         if tok[0] == TokenType.LEFT_PARENTHESES:
             paren_count += 1
+            working_stack.append(tok)
         elif tok[0] == TokenType.RIGHT_PARENTHESES:
             paren_count -= 1
 
@@ -81,7 +83,10 @@ def parse_dimension_expression(parser, stack):
             arg1 = working_stack.pop()
             if arg1[0] == TokenType.IDENTIFIER:
                 arg1 = identifier_to_dimension(arg1)
-
+            elif arg1[0] == TokenType.LEFT_PARENTHESES:
+                working_stack.append(arg2)
+                continue
+            
             func = working_stack.pop()
             if func[0] == TokenType.STAR:
                 for name, value in arg2[1].items():
