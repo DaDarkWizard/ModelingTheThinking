@@ -1,2 +1,4 @@
 (defDimension length-dimension)
+(defDimension mass-dimension)
 (defDimension area-dimension :documentation "Square footage perhaps?" := (expt length-dimension 2))
+(defDimension weird-dimension := (* length-dimension (expt mass-dimension 3)))

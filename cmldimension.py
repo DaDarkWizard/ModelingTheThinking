@@ -68,6 +68,8 @@ def parse_dimension_expression(parser, stack):
         #dim_value[id[1]] = 1
         return (TokenType.DIMENSION_VALUE, parser.scope.dimensions[id[1]].dimension.copy())
 
+    print(list(map(lambda x: x[0], stack)))
+
     while len(stack) > 0:
         tok = stack.pop()
         if tok[0] == TokenType.LEFT_PARENTHESES:
@@ -75,7 +77,7 @@ def parse_dimension_expression(parser, stack):
             working_stack.append(tok)
         elif tok[0] == TokenType.RIGHT_PARENTHESES:
             paren_count -= 1
-
+            args = list()
             arg2 = working_stack.pop()
             if arg2[0] == TokenType.IDENTIFIER:
                 arg2 = identifier_to_dimension(arg2)

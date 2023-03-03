@@ -28,30 +28,31 @@ def parse_unit(parser: CMLParser, stack: List[Tuple[TokenType, any]]):
     if tok[0] == TokenType.DIMENSION_ATTRIBUTE:
         tok = stack.pop()
         assert tok[1] in parser.scope.dimensions, "Dimension supplied does not exist"
-        new_unit.dimension[new_unit.name] = 1
-        parser.scope.dimensions[new_dim.name] = new_dim
+        new_unit.dimension = parser.scope.dimensions[tok[1]]
+        new_unit.base_unit = True
+        parser.scope.units[new_unit.name] = new_unit
     else:
-        assert tok[0] == TokenType.ASSIGNMENT_ATTRIBUTE, "Invalid dimension expression"
-        dimension_expression = get_next_parentheses_unit(stack)
-        new_dim.dimension = parse_dimension_expression(parser, dimension_expression)[1]
+        assert tok[0] == TokenType.ASSIGNMENT_ATTRIBUTE, "Invalid unit expression"
+        unit_expression = get_next_parentheses_unit(stack)
+        new_unit.dimension = parse_unit_expression(parser, unit_expression)[1]
 
-        # We do a little clean-up
-        for name, value in new_dim.dimension.items():
-            if value == 0:
-                del new_dim.dimension[name]
+        # # We do a little clean-up
+        # for name, value in new_unit.dimension.items():
+        #     if value == 0:
+        #         del new_dim.dimension[name]
         
-        # Ensure each dimension is only defined once.
-        for old_dim_name, old_dim in parser.scope.dimensions.items():
-            all_equal = True
-            for item_name, number in new_dim.dimension.items():
-                if item_name not in old_dim.dimension or number != old_dim.dimension[item_name]:
-                    all_equal = False
-                    break
-            if all_equal:
-                raise Exception(f"Dimension {old_dim_name} defined twice! Second: {new_dim.name}")
+        # # Ensure each unit is only defined once.
+        # for old_dim_name, old_dim in parser.scope.dimensions.items():
+        #     all_equal = True
+        #     for item_name, number in new_dim.dimension.items():
+        #         if item_name not in old_dim.dimension or number != old_dim.dimension[item_name]:
+        #             all_equal = False
+        #             break
+        #     if all_equal:
+        #         raise Exception(f"Dimension {old_dim_name} defined twice! Second: {new_dim.name}")
         
         # Add the dimension to the parser.
-        parser.scope.dimensions[new_dim.name] = new_dim
+        parser.scope.dimensions[new_unit.name] = new_unit
     
     return
 
