@@ -23,6 +23,7 @@ class TokenType(Enum):
     DEF_UNIT = 18
     DEF_CONSTANT_QUANTITY = 19
     DEF_SCENARIO = 20
+    COMMENT = 21
     
     DOCUMENTATION_ATTRIBUTE = 170
 

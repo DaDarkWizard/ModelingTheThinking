@@ -54,10 +54,10 @@ class Entity:
         self.consequences = consequences
     
 class Dimension:
-    def __init__(self, name : str, documentation : str = "", dimension = dict()): 
+    def __init__(self, name : str, documentation : str = "", dimension = dict()):
         self.name = name
         self.documentation = documentation
-        self.dimension: Dict[str, int] = dimension
+        self.dimension: Dict[str, int] = dimension.copy()
     
     def to_string(self):
         x = f"(defDimension {self.name} :documentation \"{self.documentation}\" "

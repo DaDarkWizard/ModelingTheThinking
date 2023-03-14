@@ -1,4 +1,4 @@
-from cmltokens import *
+from cmltokens import TokenType
 
 # Allows type hinting for lambda functions
 from typing import Callable
@@ -43,12 +43,12 @@ class Lexer:
         self.input_index = 0
         self.regexes: List[LexRule] = list()
         self.end_token = None
-    
+ 
 
     def set_input(self, input: str):
         self.input_index = 0
         self.input_text = input
-    
+
 
     def add_regex(self, new_rule: LexRule):
         self.regexes.append(new_rule)
@@ -89,7 +89,7 @@ class CMLLexer(Lexer):
     def __init__(self):
         Lexer.__init__(self)
         self.add_regex(LexRule(r'\s+', None, None, skip=True))
-        
+ 
         self.add_regex(LexRule(r'defRelation', TokenType.DEF_RELATION, None))
         self.add_regex(LexRule(r'defQuantityFunction', TokenType.DEF_QUANTITY_FUNCTION, None))
         self.add_regex(LexRule(r'defModelFragment', TokenType.DEF_MODEL_FRAGMENT, None))
@@ -115,6 +115,10 @@ class CMLLexer(Lexer):
         self.add_regex(LexRule(r'[0-9]+\.[0-9]+(?=[\s\)])', TokenType.FLOAT, lambda x: float(x)))
         self.add_regex(LexRule(r'\"(\\\"|[^\"])*\"|\'(\\\'|[^\'])*\'', TokenType.STRING, lambda x: x[1:-1]))
         self.add_regex(LexRule(r'[nN][iI][lL](?=[^\s]|\))', TokenType.NIL, None))
+
+        # Comments?
+        self.add_regex(LexRule(r'#([^\r])*\r', TokenType.COMMENT, None))
+
         self.add_regex(LexRule(r'[^\s\)]+', TokenType.IDENTIFIER, lambda x: x))
 
 
