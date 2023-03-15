@@ -1,8 +1,9 @@
-from cmllexer import *
+from cmllexer import CMLLexer
 from typing import List, Tuple
-from cmltokens import *
-from cmlscope import *
-from stackhelpers import *
+from cmltokens import TokenType
+from cmlscope import CMLScope
+from stackhelpers import get_rest_of_parentheses
+
 
 class CMLParser:
     def parse_dimension(self, stack):
@@ -37,7 +38,7 @@ class CMLParser:
         stack.reverse()
 
         self.parse_stack(stack)
-    
+
     def parse_stack(self, input_stack: List[Tuple[TokenType, any]]):
         """[summary]
 
@@ -59,11 +60,9 @@ class CMLParser:
             elif tok[0] == TokenType.DEF_UNIT:
                 self.scope.stack.pop()
                 unit_stack = get_rest_of_parentheses(input_stack)
-                #cmlunit.parse_unit(self, unit_stack)
+                self.parse_unit(unit_stack)
             else:
                 self.scope.stack.append(tok[0])
-
-
 
             if len(input_stack) == 0:
                 break

@@ -52,16 +52,19 @@ class Entity:
         self.quantities = quantities
         self.attributes = attributes
         self.consequences = consequences
-    
+
+
 class Dimension:
-    def __init__(self, name : str, documentation : str = "", dimension = dict()):
+    def __init__(self, name: str, documentation: str = "", dimension=dict()):
         self.name = name
         self.documentation = documentation
         self.dimension: Dict[str, int] = dimension.copy()
-    
+
     def to_string(self):
-        x = f"(defDimension {self.name} :documentation \"{self.documentation}\" "
-        if len(self.dimension) == 1 and self.dimension[list(self.dimension.keys())[0]] == 1:
+        x = f"(defDimension {self.name}" +\
+             " :documentation \"{self.documentation}\" "
+        if len(self.dimension) == 1 and\
+           self.dimension[list(self.dimension.keys())[0]] == 1:
             x += ")"
             return x
         else:
@@ -78,18 +81,17 @@ class Dimension:
                     x += f" (* (expt {dim_items[i][0]} {dim_items[i][1]})"
                     paren_count += 1
             x += ")"
-        
+
         return x
 
 
-
-
 class Unit:
-    def __init__(self, name : str, documentation : str = "", quantity_expression = lambda args : 0,
-                dimension = lambda args : 0):
+    def __init__(self, name: str, documentation: str = "",
+                 quantity_expression=list(),
+                 dimension: Dimension = None):
         self.name = name
         self.documentation = documentation
-        self.quantity_expression = quantity_expression
+        self.quantity_expression = quantity_expression.copy()
         self.dimension = dimension
         self.base_unit: bool = False
 
