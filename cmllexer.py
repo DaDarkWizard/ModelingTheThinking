@@ -99,6 +99,7 @@ class CMLLexer(Lexer):
         self.add_regex(LexRule(r'defConstantQuantity', TokenType.DEF_CONSTANT_QUANTITY, None))
         self.add_regex(LexRule(r'defScenario', TokenType.DEF_SCENARIO, None))
         self.add_regex(LexRule(r':documentation', TokenType.DOCUMENTATION_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':dimension', TokenType.DIMENSION_ATTRIBUTE, None))
         self.add_regex(LexRule(r':=>', TokenType.IMPLICATION_ATTRIBUTE, None))
         self.add_regex(LexRule(r':<=>', TokenType.IFF_ATTRIBUTE, None))
         self.add_regex(LexRule(r':=', TokenType.ASSIGNMENT_ATTRIBUTE, None))

@@ -20,7 +20,6 @@ def parse_dimension(parser: cmlparser.CMLParser, stack):
     tok = stack.pop()
     assert tok[0] == TokenType.IDENTIFIER, "Dimension given without a name"
     new_dim = Dimension(tok[1])
-    print(new_dim.dimension)
     assert new_dim.name not in parser.scope.dimensions,\
            f"Dimension {new_dim.name} already exists"
     tok = stack.pop()
@@ -33,7 +32,6 @@ def parse_dimension(parser: cmlparser.CMLParser, stack):
         tok = stack.pop()
 
     if tok[0] == TokenType.RIGHT_PARENTHESES:
-        print(new_dim.dimension)
         new_dim.dimension[new_dim.name] = 1
         parser.scope.dimensions[new_dim.name] = new_dim
     else:
