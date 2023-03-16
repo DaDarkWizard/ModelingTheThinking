@@ -7,3 +7,5 @@
 
 (defUnit meter :dimension length-dimension)
 (defUnit centimeter := (* 0.01 meter))
+
+# This(+ 32 (* (/ 9 5) celcius))

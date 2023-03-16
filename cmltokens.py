@@ -1,6 +1,13 @@
+"""
+This file has all the tokens used in the lexer and parser
+"""
 from enum import Enum
 
+
 class TokenType(Enum):
+    """
+    Enum with all the token types for lexing and parsing the grammar.
+    """
 
     # Base tokens
     LEFT_PARENTHESES = 1
@@ -24,6 +31,7 @@ class TokenType(Enum):
     DEF_CONSTANT_QUANTITY = 19
     DEF_SCENARIO = 20
     COMMENT = 21
+    MODEL_VALUE = 22
 
     DOCUMENTATION_ATTRIBUTE = 170
 
@@ -40,4 +48,3 @@ class TokenType(Enum):
     DIVIDE = 206
     EXPT = 207
     STAR = 208
-

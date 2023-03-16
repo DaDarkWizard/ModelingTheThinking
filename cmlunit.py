@@ -22,16 +22,16 @@ def parse_unit(parser: CMLParser, stack: List[Tuple[TokenType, any]]):
     tok = stack.pop()
     assert tok[0] == TokenType.IDENTIFIER, "Unit given without a name"
     new_unit = Unit(tok[1])
-    assert new_unit.name not in parser.scope.units,\
+    assert new_unit.name not in parser.scope.units(),\
            f"Dimension {new_unit.name} already exists"
     tok = stack.pop()
     if tok[0] == TokenType.DIMENSION_ATTRIBUTE:
         tok = stack.pop()
-        assert tok[1] in parser.scope.dimensions,\
+        assert tok[1] in parser.scope.dimensions(),\
                "Dimension supplied does not exist"
-        new_unit.dimension = parser.scope.dimensions[tok[1]]
+        new_unit.dimension = parser.scope.get_dimension(tok[1])
         new_unit.base_unit = True
-        parser.scope.units[new_unit.name] = new_unit
+        parser.scope.add_unit(new_unit)
     else:
         assert tok[0] == TokenType.ASSIGNMENT_ATTRIBUTE,\
                "Invalid unit expression"
@@ -44,7 +44,7 @@ def parse_unit(parser: CMLParser, stack: List[Tuple[TokenType, any]]):
                f"Invalid quantity expression for {new_unit.name}"
 
         # Add the dimension to the parser.
-        parser.scope.units[new_unit.name] = new_unit
+        parser.scope.add_unit(new_unit)
 
     return
 
@@ -52,11 +52,11 @@ def parse_unit(parser: CMLParser, stack: List[Tuple[TokenType, any]]):
 def parse_dimension_from_quantity_expression(parser, stack):
     for tok in stack:
         if tok[0] == TokenType.IDENTIFIER and\
-           tok[1] in parser.scope.dimensions:
+           tok[1] in parser.scope.dimensions():
             return parser.scope.dimensions[tok[1]]
         elif tok[0] == TokenType.IDENTIFIER and\
-                tok[1] in parser.scope.units:
-            return parser.scope.units[tok[1]].dimension
+                tok[1] in parser.scope.units():
+            return parser.scope.get_unit(tok[1]).dimension
 
     return None
 

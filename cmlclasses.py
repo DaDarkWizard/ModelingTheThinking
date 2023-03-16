@@ -95,6 +95,7 @@ class Unit:
         self.dimension = dimension
         self.base_unit: bool = False
 
+
 class ModelValue:
     def __init__(self):
         self.quantity = 0
@@ -102,12 +103,12 @@ class ModelValue:
 
 
 class ConstantQuantity:
-    def __init__(self, name : str, documentation : str = "", quantity_expression = lambda args : 0,
-                dimension = lambda args : 0):
+    def __init__(self, name: str, documentation: str = "",
+                 value: ModelValue = None):
         self.name = name
         self.documentation = documentation
-        self.quantity_expression = quantity_expression
-        self.dimension = dimension
+        self.value = value
+
 
 class Scenario:
     def __init__(self, name : str, documentation : str = "", individuals = dict[str, object],

@@ -20,7 +20,7 @@ def parse_dimension(parser: cmlparser.CMLParser, stack):
     tok = stack.pop()
     assert tok[0] == TokenType.IDENTIFIER, "Dimension given without a name"
     new_dim = Dimension(tok[1])
-    assert new_dim.name not in parser.scope.dimensions,\
+    assert new_dim.name not in parser.scope.dimensions(),\
            f"Dimension {new_dim.name} already exists"
     tok = stack.pop()
 
@@ -33,7 +33,7 @@ def parse_dimension(parser: cmlparser.CMLParser, stack):
 
     if tok[0] == TokenType.RIGHT_PARENTHESES:
         new_dim.dimension[new_dim.name] = 1
-        parser.scope.dimensions[new_dim.name] = new_dim
+        parser.scope.add_dimension(new_dim)
     else:
         assert tok[0] == TokenType.ASSIGNMENT_ATTRIBUTE,\
                "Invalid dimension expression"
@@ -49,7 +49,7 @@ def parse_dimension(parser: cmlparser.CMLParser, stack):
                 del new_dim.dimension[name]
 
         # Ensure each dimension is only defined once.
-        for old_dim_name, old_dim in parser.scope.dimensions.items():
+        for old_dim_name, old_dim in parser.scope.dimensions().items():
             all_equal = True
             for item_name, number in new_dim.dimension.items():
                 if item_name not in old_dim.dimension or\
@@ -61,7 +61,7 @@ def parse_dimension(parser: cmlparser.CMLParser, stack):
                                 "Second: {new_dim.name}")
 
         # Add the dimension to the parser.
-        parser.scope.dimensions[new_dim.name] = new_dim
+        parser.scope.add_dimension(new_dim)
 
 
 def parse_dimension_expression(parser, stack):
@@ -74,14 +74,12 @@ def parse_dimension_expression(parser, stack):
 
     def identifier_to_dimension(id):
         assert id[0] == TokenType.IDENTIFIER, "Invalid dimension given"
-        assert id[1] in parser.scope.dimensions,\
+        assert id[1] in parser.scope.dimensions(),\
             "Undefined dimension in dimension definision"
         # dim_value = dict()
         # dim_value[id[1]] = 1
-        return (TokenType.DIMENSION_VALUE, parser.scope.dimensions[id[1]]
+        return (TokenType.DIMENSION_VALUE, parser.scope.get_dimension(id[1])
                                                  .dimension.copy())
-
-    print(list(map(lambda x: x[0], stack)))
 
     while len(stack) > 0:
         tok = stack.pop()
