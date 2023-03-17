@@ -1,10 +1,12 @@
 import cmlparser
 import os
 from tkinter import *
+from tkinter import ttk
+
 
 # Be able to use all 18 widgets in Tkinter 
 # Button, Checkbutton, Entry, Frame, Label, LabelFrame, Menubutton, PanedWindow, Radiobutton, Scale, Scrollbar, Spinbox, Combobox, Notebook, Progressbar, Separator, Sizegrip and Treeview
-from tkinter.ttk import *
+#from tkinter.ttk import *
 
 from tkinter import filedialog # To be able to open file explorer and open a file
 from tkinter.messagebox import showinfo # For dialogue box
@@ -62,7 +64,14 @@ def menu():
     root.config(menu=menubar)
 
 def diagramPane():
-    hi = 0
+    style = ttk.Style()
+    style.configure("DiaPane.TPanedwindow", padding=100, sashrelief=5)
+    style.configure("DiaPane.TLabel", foreground="red")
+    diaPane = ttk.PanedWindow(orient=HORIZONTAL, style="DiaPane.TPanedwindow")
+    #diaPane = PanedWindow(bg="black", borderwidth=10)
+    #diaPane.pack(side=LEFT, fill="y")
+    diaPane.pack()
+    diaPane.add(ttk.Label(diaPane, text="Diagram Pane", style="DiaPane.TLabel"))
     
 # create GUI
 root = Tk()
@@ -80,13 +89,32 @@ root.title("Modeling The Thinking")
 # set window with size 800x600 (4:3) (maybe add option later that lets user change default opening res)
 root.geometry("800x600")
 
+testlabel = Label(text='test')
+testlabel.pack(side = BOTTOM)
+
 # add menubar to window
 menu()
 
 # add paned window to left hand side of root for tools
 
 # add paned window to right hand side of root for diagrams
-diagramPane()
+# diagramPane()
+
+# paned window
+pw = ttk.PanedWindow(orient=BOTH)
+
+# Left listbox
+left_list = Listbox(root)
+left_list.pack(side=LEFT)
+pw.add(left_list)
+
+# Right listbox
+right_list = Listbox(root)
+right_list.pack(side=RIGHT)
+pw.add(right_list)
+
+# place the panedwindow on the root window
+pw.pack(fill=BOTH, expand=True)
 
 # run GUI
 root.mainloop()
