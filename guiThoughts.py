@@ -1,13 +1,22 @@
 import cmlparser
 import os
 from tkinter import *
-from tkinter import filedialog
-from tkinter.messagebox import showinfo
+
+# Be able to use all 18 widgets in Tkinter 
+# Button, Checkbutton, Entry, Frame, Label, LabelFrame, Menubutton, PanedWindow, Radiobutton, Scale, Scrollbar, Spinbox, Combobox, Notebook, Progressbar, Separator, Sizegrip and Treeview
+from tkinter.ttk import *
+
+from tkinter import filedialog # To be able to open file explorer and open a file
+from tkinter.messagebox import showinfo # For dialogue box
 
 def createFile():
     hi = 0
     
 def browseFiles():
+    """
+    Browse for files on system and open it
+    """    
+    
     # Open file explorer in directory of program
     path = os.getcwd()
     fileName = filedialog.askopenfilename(initialdir=path, title='Select a file', filetypes=(('CML files','*.cml*'), ('All files','*.*')))
@@ -15,8 +24,10 @@ def browseFiles():
     # If there was a file chosen, run this
     if fileName != '':
     
-        showinfo(title='Selected File', message=fileName)
+        # Pop-up to show user the chosen file
+        showinfo(title='Selected File', message="Opened file at \"" + fileName + "\"")
     
+        # This portion will probably be moved to a different function
         input_text = open(fileName).read()
         parser = cmlparser.CMLParser()
         parser.reset()
@@ -28,9 +39,7 @@ def saveFile():
 
 def menu():
     """
-    Creates a menu bar\n
-    Args:\n
-        root (_type_): _description_
+    Creates a menu bar
     """    
     # Create menu bar
     menubar = Menu(root)
@@ -52,19 +61,32 @@ def menu():
     
     root.config(menu=menubar)
 
+def diagramPane():
+    hi = 0
+    
 # create GUI
 root = Tk()
 
+# Get current session's screen width and height
+screenWidth = root.winfo_screenwidth()
+screenHeight = root.winfo_screenheight()
+
+# tkinter docs told me to add this line
 root.option_add('*tearOff', FALSE)
 
 # set title of window
 root.title("Modeling The Thinking")
 
-# set window with size 720p
-root.geometry("1280x720")
+# set window with size 800x600 (4:3) (maybe add option later that lets user change default opening res)
+root.geometry("800x600")
 
 # add menubar to window
 menu()
+
+# add paned window to left hand side of root for tools
+
+# add paned window to right hand side of root for diagrams
+diagramPane()
 
 # run GUI
 root.mainloop()
