@@ -1,3 +1,4 @@
+from typing import Dict
 from stackhelpers import TokenType, get_next_parentheses_unit
 from cmlclasses import Dimension
 import cmlparser
@@ -44,9 +45,7 @@ def parse_dimension(parser: cmlparser.CMLParser, stack):
                             )[1]
 
         # We do a little clean-up
-        for name, value in new_dim.dimension.items():
-            if value == 0:
-                del new_dim.dimension[name]
+        simplify_dimension(new_dim.dimension)
 
         # Ensure each dimension is only defined once.
         for old_dim_name, old_dim in parser.scope.dimensions().items():
@@ -174,3 +173,55 @@ def parse_dimension_expression(parser, stack):
             working_stack.append(tok)
 
     return working_stack.pop()
+
+
+def simplify_dimension(dim: Dict[str, int]):
+    """
+    Simplifies a dimension dictionary (removes 0s)
+    """
+    for name, value in dim.items():
+        if value == 0:
+            del dim[name]
+
+
+def dim_equal(a: Dict[str, int], b: Dict[str, int]):
+    """
+    Compares if two dimensions are equal.
+    """
+    simplify_dimension(a)
+    simplify_dimension(b)
+    for k in a.keys():
+        if k not in b:
+            return False
+        if a[k] != b[k]:
+            return False
+    for k in b.keys():
+        if k not in a:
+            return False
+    return True
+
+
+def dim_div(a: Dict[str, int], b: Dict[str, int]):
+    """
+    Divides the first dimension by the second.
+    """
+    result = a.copy()
+    for k, v in b:
+        if k not in result:
+            result[k] = -1 * v
+        else:
+            result[k] -= v
+    return simplify_dimension(result)
+
+
+def dim_mul(a: Dict[str, int], b: Dict[str, int]):
+    """
+    Multiplies the first dimension by the second.
+    """
+    result = a.copy()
+    for k, v in b:
+        if k not in result:
+            result[k] = v
+        else:
+            result[k] = v
+    return simplify_dimension(result)

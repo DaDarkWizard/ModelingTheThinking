@@ -10,7 +10,6 @@ class Relation:
         self.secsentence = secsentence
         self.function = function
         self.time_dependent = time_dependent
-        
 
 
 class QuantityFunction:
@@ -41,7 +40,7 @@ class ModelFragment:
         self.quantities = quantities
         self.attributes = attributes
         self.consequences = consequences
-    
+
 
 class Entity:
     def __init__(self, name: str, documentation: str = "", sub_class_of = object, 
@@ -85,21 +84,20 @@ class Dimension:
         return x
 
 
-class Unit:
-    def __init__(self, name: str, documentation: str = "",
-                 quantity_expression=list(),
-                 dimension: Dimension = None):
-        self.name = name
-        self.documentation = documentation
-        self.quantity_expression = quantity_expression.copy()
-        self.dimension = dimension
-        self.base_unit: bool = False
-
-
 class ModelValue:
     def __init__(self):
         self.quantity = 0
         self.dimension = dict()
+
+
+class Unit:
+    def __init__(self, name: str, documentation: str = "",
+                 value: ModelValue = ModelValue()):
+        self.name = name
+        self.documentation = documentation
+        self.value = ModelValue()
+        self.value.dimension = value.dimension.copy()
+        self.value.quantity = value.quantity
 
 
 class ConstantQuantity:
