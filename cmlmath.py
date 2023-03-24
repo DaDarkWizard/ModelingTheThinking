@@ -10,6 +10,34 @@ from cmlclasses import ModelValue
 from cmldimension import dim_mul, dim_div, dim_equal
 
 
+def parse_math_expression(parser: CMLParser,
+                          stack: List[Tuple[TokenType, any]]):
+    """
+    [summary]
+    Parses an entire math expression.
+    """
+    working_stack = []
+    paren_count = 0
+    while len(stack) > 0:
+        tok = stack.pop(0)
+        if tok[0] == TokenType.LEFT_PARENTHESES:
+            working_stack.append(tok)
+            paren_count += 1
+        elif tok[0] == TokenType.RIGHT_PARENTHESES:
+            paren_count -= 1
+            args = []
+            while working_stack[-1][0] != TokenType.LEFT_PARENTHESES:
+                args.insert(0, working_stack.pop())
+            working_stack.pop()
+            func_id = args.pop(0)
+            working_stack.append(handle_math_function(parser,
+                                                      func_id,
+                                                      args))
+        else:
+            working_stack.append(tok)
+    return working_stack[-1]
+
+
 def handle_math_function(parser: CMLParser,
                          func_id: Tuple[TokenType, any],
                          args: List[Tuple[TokenType, any]]):
@@ -34,7 +62,8 @@ def handle_math_function(parser: CMLParser,
                                 "while parsing math expression.")
 
             args[i] = (TokenType.MODEL_VALUE, new_arg)
-        if arg[0] == TokenType.NUMBER:
+        if arg[0] == TokenType.NUMBER or\
+           arg[0] == TokenType.FLOAT:
             new_arg = ModelValue()
             new_arg.quantity = arg[1]
             new_arg.dimension = {}
@@ -66,8 +95,8 @@ def star(parser, func_id, args):
         assert val[0] == TokenType.MODEL_VALUE and\
                isinstance(val[1], ModelValue),\
                "Improper value in star operation."
-        result[1].quantity *= val.quantity
-        result[1].dimension = dim_mul(result.dimension, val.dimension)
+        result[1].quantity *= val[1].quantity
+        result[1].dimension = dim_mul(result[1].dimension, val[1].dimension)
     return result
 
 

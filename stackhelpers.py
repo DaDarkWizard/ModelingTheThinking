@@ -2,9 +2,9 @@ from cmltokens import *
 
 def get_rest_of_parentheses(stack):
     paren_count = 1
-    
+
     ret_val = list()
-    
+
     while paren_count > 0 and len(stack) > 0:
         tok = stack.pop()
         if tok[0] == TokenType.LEFT_PARENTHESES:
@@ -12,7 +12,7 @@ def get_rest_of_parentheses(stack):
         elif tok[0] == TokenType.RIGHT_PARENTHESES:
             paren_count -= 1
         ret_val.append(tok)
-    
+
     assert paren_count == 0, "Failed to get ending parentheses"
 
     ret_val.reverse()
@@ -30,4 +30,3 @@ def get_next_parentheses_unit(stack):
         return ret_val
     else:
         return stack.pop()
-        

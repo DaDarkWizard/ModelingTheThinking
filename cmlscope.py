@@ -4,7 +4,7 @@ All scope related functions.
 
 from typing import List, Tuple, Dict
 from cmltokens import TokenType
-from cmlclasses import Unit, Dimension
+from cmlclasses import Unit, Dimension, Relation
 
 
 class CMLScope:
@@ -65,7 +65,7 @@ class CMLScope:
         Adds a dimension to the scope.
         """
         assert dimension.name not in self.objconsts(),\
-               "objconst already exists for unit definition."
+               "objconst already exists for dimension definition."
         self.__objconsts[dimension.name] = dimension
 
     def get_dimension(self, dimension_name: str):
@@ -77,3 +77,28 @@ class CMLScope:
         assert isinstance(self.objconsts()[dimension_name], Dimension),\
                "Objconst is not diemension"
         return self.objconsts()[dimension_name]
+
+    def relations(self):
+        """
+        Returns a dictionary of all relations in scope.
+        """
+        return dict((k, v) for k, v in self.objconsts().items()
+                    if isinstance(v, Relation))
+
+    def add_relation(self, relation: Relation):
+        """
+        Adds a relation to the scope.
+        """
+        assert relation.name not in self.objconsts(),\
+               "objconst already exists for relation definition."
+        self.__objconsts[relation.name] = relation
+
+    def get_relation(self, relation_name: str):
+        """
+        Gets a relation from the scope.
+        """
+        assert relation_name in self.objconsts(),\
+               "Unit name does not exists"
+        assert isinstance(self.objconsts()[relation_name], Relation),\
+               "Objconst is not diemension"
+        return self.objconsts()[relation_name]

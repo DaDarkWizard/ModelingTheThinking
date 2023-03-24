@@ -7,6 +7,6 @@ parser.reset()
 parser.parse_string(input_text)
 
 # x = list(map(lambda x: x.dimension, list(parser.scope.dimensions.values())))
-x = list(map(lambda x: x.name, list(parser.scope.units().values())))
+x = list(map(lambda x: x.value.to_string(), list(parser.scope.units().values())))
 
 print(x)

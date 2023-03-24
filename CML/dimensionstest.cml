@@ -9,3 +9,13 @@
 (defUnit centimeter := (* 0.01 meter))
 
 # This(+ 32 (* (/ 9 5) celcius))
+#
+#
+# (lambda (?t) (* 5 ?t))
+
+(defDimension temperature-dimension)
+(defUnit kelvin :dimension temperature-dimension)
+(defRelation celcius (?t ?f)
+  :=> (dimension ?t temperature-dimension)
+  :<=> (= ?f (- (magnitude ?t kelvin) 273.15))
+  :function t)

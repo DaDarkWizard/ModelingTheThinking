@@ -1,12 +1,21 @@
-from stackhelpers import get_next_parentheses_unit
-from cmlclasses import Unit
-from cmlparser import CMLParser
+"""
+Handles all functions for parsing a CML unit.
+
+Daniel Masker
+23-03-2023
+
+"""
 from typing import List, Tuple
+from stackhelpers import get_next_parentheses_unit
+from cmlclasses import Unit, ModelValue
+from cmlparser import CMLParser
 from cmltokens import TokenType
+from cmlmath import parse_math_expression
 
 
 def parse_unit(parser: CMLParser, stack: List[Tuple[TokenType, any]]):
-    """[summary]
+    """
+    [summary]
 
         Parses a stack containing a unit description.
 
@@ -29,31 +38,36 @@ def parse_unit(parser: CMLParser, stack: List[Tuple[TokenType, any]]):
         tok = stack.pop()
         assert tok[1] in parser.scope.dimensions(),\
                "Dimension supplied does not exist"
-        new_unit.dimension = parser.scope.get_dimension(tok[1])
+        new_unit_value = ModelValue()
+        new_unit_value.dimension = parser.scope.get_dimension(tok[1])\
+                                         .dimension.copy()
+        new_unit_value.quantity = 1
+        new_unit.value = new_unit_value
+
         new_unit.base_unit = True
         parser.scope.add_unit(new_unit)
     else:
         assert tok[0] == TokenType.ASSIGNMENT_ATTRIBUTE,\
                "Invalid unit expression"
         unit_expression = get_next_parentheses_unit(stack)
-        new_unit.quantity_expression = unit_expression
-        new_unit.dimension = parse_dimension_from_quantity_expression(
-                                parser, unit_expression)
-
-        assert new_unit.dimension is not None,\
+        unit_expression.reverse()
+        unit_value = parse_math_expression(parser, unit_expression)
+        assert unit_value[0] == TokenType.MODEL_VALUE,\
+               "Result of unit expression should be a value."
+        new_unit.value = unit_value[1]
+        assert new_unit.value.dimension is not None,\
                f"Invalid quantity expression for {new_unit.name}"
 
         # Add the dimension to the parser.
         parser.scope.add_unit(new_unit)
-    return
 
 
-def parse_dimension_from_quantity_expression(parser, stack):
-    for tok in stack:
-        if tok[0] == TokenType.IDENTIFIER and\
-           tok[1] in parser.scope.dimensions():
-            return parser.scope.get_dimension(tok[1])
-        elif tok[0] == TokenType.IDENTIFIER and\
-                tok[1] in parser.scope.units():
-            return parser.scope.get_unit(tok[1]).dimension
-    return None
+# def parse_dimension_from_quantity_expression(parser, stack):
+#     for tok in stack:
+#         if tok[0] == TokenType.IDENTIFIER and\
+#            tok[1] in parser.scope.dimensions():
+#             return parser.scope.get_dimension(tok[1])
+#         elif tok[0] == TokenType.IDENTIFIER and\
+#                 tok[1] in parser.scope.units():
+#             return parser.scope.get_unit(tok[1]).dimension
+#     return None
