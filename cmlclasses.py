@@ -1,13 +1,17 @@
 from typing import List, Dict, Tuple
+from cmltokens import TokenType
+
 
 class Relation:
     def __init__(self, name: str, args: List[str], documentation: str = "",
-                 first_sentence = lambda args: False, secsentence = "", function = True, time_dependent = False ):
+                 implication: List[Tuple[str, any]] = [],
+                 iff: List[Tuple[str, any]] = [], function: bool = True,
+                 time_dependent: bool = False):
         self.name = name
         self.args = args
         self.documentation = documentation
-        self.first_sentence = first_sentence
-        self.secsentence = secsentence
+        self.implication = implication.copy()
+        self.iff = iff.copy()
         self.function = function
         self.time_dependent = time_dependent
 
@@ -89,28 +93,50 @@ class ModelValue:
         self.quantity = 0
         self.dimension = dict()
 
+    def copy(self):
+        result = ModelValue()
+        result.quantity = self.quantity
+        result.dimension = self.dimension.copy()
+        return result
+
+    def to_string(self):
+        dim_items = list(self.dimension.items())
+        paren_count = 0
+        x = ""
+        for i in range(len(dim_items)):
+            if i == len(dim_items) - 1:
+                x += f" (expt {dim_items[i][0]} {dim_items[i][1]})"
+                while paren_count > 0:
+                    x += ")"
+                    paren_count -= 1
+            else:
+                x += f" (* (expt {dim_items[i][0]} {dim_items[i][1]})"
+                paren_count += 1
+        x += ")"
+        return f"(* {self.quantity} {x})"
+
 
 class Unit:
     def __init__(self, name: str, documentation: str = "",
                  value: ModelValue = ModelValue()):
         self.name = name
         self.documentation = documentation
-        self.value = ModelValue()
-        self.value.dimension = value.dimension.copy()
-        self.value.quantity = value.quantity
+        self.value = value.copy()
 
 
 class ConstantQuantity:
     def __init__(self, name: str, documentation: str = "",
-                 value: ModelValue = None):
+                 value: ModelValue = ModelValue()):
         self.name = name
         self.documentation = documentation
-        self.value = value
+        self.value = value.copy()
 
 
 class Scenario:
-    def __init__(self, name : str, documentation : str = "", individuals = dict[str, object],
-                initially : str = "", throughout : str = ""):
+
+    def __init__(self, name: str, documentation: str = "",
+                 individuals: dict[str, object] = {},
+                 initially: str = "", throughout: str = ""):
         self.name = name
         self.documentation = documentation
         self.individuals = individuals

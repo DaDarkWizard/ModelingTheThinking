@@ -103,6 +103,12 @@ class CMLLexer(Lexer):
         self.add_regex(LexRule(r':=>', TokenType.IMPLICATION_ATTRIBUTE, None))
         self.add_regex(LexRule(r':<=>', TokenType.IFF_ATTRIBUTE, None))
         self.add_regex(LexRule(r':=', TokenType.ASSIGNMENT_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':time-dependent',
+                               TokenType.TIME_DEPENDENT_ATTRIBUTE,
+                               None))
+        self.add_regex(LexRule(r':function',
+                               TokenType.FUNCTION_ATTRIBUTE,
+                               None))
         self.add_regex(LexRule(r'\+', TokenType.PLUS, None))
         self.add_regex(LexRule(r'-', TokenType.MINUS, None))
         self.add_regex(LexRule(r'\*', TokenType.STAR, None))

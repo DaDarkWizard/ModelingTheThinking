@@ -182,6 +182,7 @@ def simplify_dimension(dim: Dict[str, int]):
     for name, value in dim.items():
         if value == 0:
             del dim[name]
+    return dim
 
 
 def dim_equal(a: Dict[str, int], b: Dict[str, int]):
@@ -219,9 +220,9 @@ def dim_mul(a: Dict[str, int], b: Dict[str, int]):
     Multiplies the first dimension by the second.
     """
     result = a.copy()
-    for k, v in b:
+    for k, v in b.items():
         if k not in result:
             result[k] = v
         else:
-            result[k] = v
+            result[k] += v
     return simplify_dimension(result)
