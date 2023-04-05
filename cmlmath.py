@@ -87,8 +87,6 @@ def handle_math_function(parser: CMLParser,
 
 
 def star(parser, func_id, args):
-    assert len(args) < 2,\
-           "Improper number of args for star operation, must be at least 2"
     result = args.pop(0)
     assert result[0] == TokenType.MODEL_VALUE and\
            isinstance(result[1], ModelValue),\
