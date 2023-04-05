@@ -195,7 +195,7 @@ def asin(parser, func_id, args):
     #TODO dimension stuffs
     assert len(args) != 1,\
            "Improper number of args for asin operation, must be 1"
-    
+
     result = args.pop(0)
     assert result[0] == TokenType.MODEL_VALUE and\
            isinstance(result[1], ModelValue),\
@@ -208,7 +208,7 @@ def asinh(parser, func_id, args):
     #TODO dimension stuffs
     assert len(args) != 1,\
            "Improper number of args for asinh operation, must be 1"
-    
+
     result = args.pop(0)
     assert result[0] == TokenType.MODEL_VALUE and\
            isinstance(result[1], ModelValue),\
@@ -221,7 +221,7 @@ def atan(parser, func_id, args):
     #TODO dimension stuffs
     assert len(args) != 1,\
            "Improper number of args for atan operation, must be 1"
-    
+
     result = args.pop(0)
     assert result[0] == TokenType.MODEL_VALUE and\
            isinstance(result[1], ModelValue),\

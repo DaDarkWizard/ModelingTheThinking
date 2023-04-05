@@ -18,6 +18,10 @@ class CMLParser:
         from cmlrelation import parse_relation
         parse_relation(self, stack)
 
+    def parse_modelfragment(self, stack):
+        from cmlmodelfragment import parse_modelfragment
+        parse_modelfragment(self, stack)
+
     def __init__(self):
         self.input = ""
         self.lexer = CMLLexer()
@@ -69,6 +73,10 @@ class CMLParser:
                 self.scope.stack.pop()
                 unit_stack = get_rest_of_parentheses(input_stack)
                 self.parse_relation(unit_stack)
+            elif tok[0] == TokenType.DEF_MODEL_FRAGMENT:
+                self.scope.stack.pop()
+                unit_stack = get_rest_of_parentheses(input_stack)
+                self.parse_modelfragment(unit_stack)
             else:
                 self.scope.stack.append(tok[0])
 

@@ -38,6 +38,7 @@ class ModelFragment:
                 attributes : List[str] = [], consequences : str = ""):
         self.name = name
         self.documentation = documentation
+        self.implication: List[Tuple[TokenType, any]] = []
         self.sub_class_of = sub_class_of
         self.participants = participants
         self.conditions = conditions
@@ -45,6 +46,8 @@ class ModelFragment:
         self.attributes = attributes
         self.consequences = consequences
 
+    def to_string(self):
+        return f"({self.name})"
 
 class Entity:
     def __init__(self, name: str, documentation: str = "", sub_class_of = object, 

@@ -33,7 +33,7 @@ class LexRule:
 
 class Lexer:
     """[summary]
-    
+
     The main Lexer class. Handles converting a textual input into tokens.
 
     """
@@ -43,7 +43,7 @@ class Lexer:
         self.input_index = 0
         self.regexes: List[LexRule] = list()
         self.end_token = None
- 
+
 
     def set_input(self, input: str):
         self.input_index = 0
@@ -89,17 +89,34 @@ class CMLLexer(Lexer):
     def __init__(self):
         Lexer.__init__(self)
         self.add_regex(LexRule(r'\s+', None, None, skip=True))
- 
+
         self.add_regex(LexRule(r'defRelation', TokenType.DEF_RELATION, None))
-        self.add_regex(LexRule(r'defQuantityFunction', TokenType.DEF_QUANTITY_FUNCTION, None))
-        self.add_regex(LexRule(r'defModelFragment', TokenType.DEF_MODEL_FRAGMENT, None))
+        self.add_regex(LexRule(r'defQuantityFunction',
+                               TokenType.DEF_QUANTITY_FUNCTION, None))
+        self.add_regex(LexRule(r'defModelFragment',
+                               TokenType.DEF_MODEL_FRAGMENT, None))
         self.add_regex(LexRule(r'defEntity', TokenType.DEF_ENTITY, None))
         self.add_regex(LexRule(r'defDimension', TokenType.DEF_DIMENSION, None))
         self.add_regex(LexRule(r'defUnit', TokenType.DEF_UNIT, None))
-        self.add_regex(LexRule(r'defConstantQuantity', TokenType.DEF_CONSTANT_QUANTITY, None))
+        self.add_regex(LexRule(r'defConstantQuantity',
+                               TokenType.DEF_CONSTANT_QUANTITY, None))
         self.add_regex(LexRule(r'defScenario', TokenType.DEF_SCENARIO, None))
-        self.add_regex(LexRule(r':documentation', TokenType.DOCUMENTATION_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':dimension', TokenType.DIMENSION_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':documentation',
+                               TokenType.DOCUMENTATION_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':dimension',
+                               TokenType.DIMENSION_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':non-numeric',
+                               TokenType.NON_NUMERIC_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':piecewise-continuous',
+                               TokenType.PIECEWISE_CONTINUOUS_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':step-quantity',
+                               TokenType.STEP_QUANTITY_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':count-quantity',
+                               TokenType.COUNT_QUANTITY_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':subclass-of',
+                               TokenType.SUBCLASS_OF_ATTRIBUTE, None))
+        self.add_regex(LexRule(r':participants',
+                               TokenType.PARTICIPANTS_ATTRIBUTE, None))
         self.add_regex(LexRule(r':=>', TokenType.IMPLICATION_ATTRIBUTE, None))
         self.add_regex(LexRule(r':<=>', TokenType.IFF_ATTRIBUTE, None))
         self.add_regex(LexRule(r':=', TokenType.ASSIGNMENT_ATTRIBUTE, None))

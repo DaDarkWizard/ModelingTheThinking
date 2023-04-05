@@ -28,21 +28,21 @@ def parse_relation(parser: CMLParser,
     new_relation = Relation(tok[1], rel_args)
 
     if stack[-1][0] == TokenType.IMPLICATION_ATTRIBUTE:
-        stack.pop(0)
+        stack.pop()
         new_relation.implication = get_next_parentheses_unit(stack)
 
     if stack[-1][0] == TokenType.IFF_ATTRIBUTE:
-        stack.pop(0)
+        stack.pop()
         new_relation.iff = get_next_parentheses_unit(stack)
 
     if stack[-1][0] == TokenType.FUNCTION_ATTRIBUTE:
-        stack.pop(0)
-        tok = stack.pop(0)
+        stack.pop()
+        tok = stack.pop()
         new_relation.function = (tok[1].lower() == "t")
 
     if stack[-1][0] == TokenType.TIME_DEPENDENT_ATTRIBUTE:
-        stack.pop(0)
-        tok = stack.pop(0)
+        stack.pop()
+        tok = stack.pop()
         new_relation.time_dependent = (tok[1].lower() == "t")
 
     parser.scope.add_relation(new_relation)
