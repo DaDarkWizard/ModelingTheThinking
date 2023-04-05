@@ -46,7 +46,7 @@ class ModelFragment:
         self.attributes = attributes
         self.consequences = consequences
 
-    def to_string(self):
+    def to_string(sel):
         return f"({self.name})"
 
 class Entity:

@@ -110,7 +110,7 @@ class CMLScope:
         return dict((k, v) for k, v in self.objconsts().items()
                     if isinstance(v, ModelFragment))
 
-    def add_modelfragments(self, modelfragment: ModelFragment):
+    def add_modelfragment(self, modelfragment: ModelFragment):
         """
         Adds a modelfragment to the scope.
         """
