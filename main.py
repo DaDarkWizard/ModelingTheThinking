@@ -1,7 +1,7 @@
 import cmlparser
 import sys
 
-input_text = open("CML/dimensionstest.cml").read()
+input_text = open("CML/bigtest.cml").read()
 parser = cmlparser.CMLParser()
 parser.reset()
 parser.parse_string(input_text)

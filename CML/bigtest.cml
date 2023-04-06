@@ -1,0 +1,236 @@
+(defEntity variable)
+
+(defEntity stock
+    :subclass-of (variable)
+)
+
+(defEntity flow
+    :subclass-of (variable)
+)
+
+(defEntity parameter
+    :subclass-of (variable)
+)
+
+(defEntity pot-seasonal-parameter
+    :subclass-of (parameter)
+)
+
+(defEntity integer
+    :subclass-of (parameter)
+)
+
+(defEntity event-switch
+    :subclass-of (variable)
+)
+
+(defEntity object)
+
+(defEntity vegetation-component
+    :subclass-of (object)
+)
+
+(defEntity vegetation-live-component
+    :subclass-of (vegetation-component)
+)
+
+(defEntity vegetation-dead-component
+    :subclass-of (vegetation-component)
+)
+
+(defEntity vegetation
+    :subclass-of (vegetation-live-component)
+)
+
+(defproperty endogenous-1
+    :source-participants ((?m :type variable))
+    :structural-conditions ((== ?m *))
+    :property (endogenous ?m)
+);defproperty
+
+(defproperty endogenous-2
+    :source-participants ((?m :type variable))
+    :structural-conditions ((d/dt ?m *))
+    :property (endogenous ?m)
+);defproperty
+
+(defproperty exogenous
+    :source-participants ((?m :type variable))
+    :structural-conditions ((not (endogenous ?m)))
+    :property (exogenous ?m)
+);defproperty
+
+;-------------------------------------------------------------------------------
+; If the lifeform of a vegetation is relevant, include a variable to represent
+; this property.
+;-------------------------------------------------------------------------------
+(defModelFragment vegetation-lifeform
+    :source-participants
+        ((?vegetation :type vegetation))
+    :assumptions
+        ((relevant lifeform ?vegetation))
+    :target-participants
+        ((?lifeform :type variable :name lifeform))
+    :postconditions
+        ((lifeform-of ?lifeform ?vegetation))
+)
+
+;-------------------------------------------------------------------------------
+; Model fragments for partioning a vegetation into components
+; (The approach taken is one that can be generalised to all modelling problems
+; that require a part-of hierarchy. The postconditions (e.g.
+; (above-ground-vegetation ?above-ground-veg))indicating the function
+; of the components could have been replaced by specialised types in a
+; type taxonomy (e.g. an above-ground-vegetation is a vegetation-live-component).
+;
+; Here: a vegetation may consist of an above-ground and a below-ground
+; partition. The above-ground partition may consist of greens and woods.
+; The below-ground partition may consist of woody roots and relocatable
+; resources.
+;-------------------------------------------------------------------------------
+(defModelFragment vegetation-is-part-of-itself
+    :source-participants
+        ((?veg :type vegetation))
+    :postconditions
+        ((part-of ?veg ?veg))
+);defModelFragment
+
+(defModelFragment vegetation->above-and-below-ground-partitions
+    :source-participants
+        ((?veg :type vegetation))
+    :assumptions
+        ((model ?veg ground-partitioning))
+    :target-participants
+        (
+         (?above-ground-veg :type vegetation-live-component :name above-ground-vegetation)
+         (?below-ground-veg :type vegetation-live-component :name below-ground-vegetation)
+        )
+    :postconditions
+        (
+            (partitioning ?veg ?above-ground-veg ?below-ground-veg)
+            (above-ground-vegetation ?above-ground-veg)
+            (below-ground-vegetation ?below-ground-veg)
+            (part-of ?above-ground-veg ?veg)
+            (part-of ?below-ground-veg ?veg)
+        )
+);defModelFragment
+
+(defModelFragment above-ground-vegetation->green-and-wood-partition
+    :source-participants
+        (
+            (?veg :type vegetation)
+            (?above-ground-veg :type vegetation-live-component)
+        )
+    :structural-conditions
+        (
+            (above-ground-vegetation ?above-ground-veg)
+            (part-of ?above-ground-veg ?veg)
+        )
+    :assumptions
+        ((model ?above-ground-veg green-wood-partitioned))
+    :target-participants
+        (
+            (?green :type vegetation-live-component :name green)
+            (?wood :type vegetation-live-component :name wood)
+        )
+    :postconditions
+        (
+            (partitioning ?above-ground-veg ?green ?wood)
+            (green ?green)
+            (wood ?wood)
+            (part-of ?green ?veg)
+            (part-of ?wood ?veg)
+        )
+);defModelFragment
+
+(defModelFragment below-ground-vegetation->root-partitions
+    :source-participants
+        (
+            (?veg :type vegetation)
+            (?below-ground-veg :type vegetation-live-component)
+        )
+    :structural-conditions
+        (
+            (below-ground-vegetation ?below-ground-veg)
+            (part-of ?below-ground-veg ?veg)
+        )
+    :assumptions
+        ((model ?below-ground-veg wood-resource-partitioned))
+    :target-participants
+        (
+            (?relocatable-resources :type vegetation-live-component :name relocatable-resources)
+            (?woody-roots :type vegetation-live-component :name woody-roots)
+        )
+    :postconditions
+        (
+            (partitioning ?below-ground-veg ?relocatable-resources ?woody-roots)
+            (relocatable-resources ?relocatable-resources)
+            (woody-roots ?woody-roots)
+            (part-of ?relocatable-resources ?veg)
+            (part-of ?woody-roots ?veg)
+        )
+);defModelFragment
+
+;-------------------------------------------------------------------------------
+; If interested in the growth of a vegetation, and assuming that a component
+; of that vegetation is not to be partitioned further (i.e. it is model
+; aggregate), then a stock should be created for that component
+;-------------------------------------------------------------------------------
+(defModelFragment growth-phenomenon
+    :source-participants
+        (
+            (?vegetation :type vegetation)
+            (?component :type vegetation-live-component)
+        )
+    :structural-conditions
+        ((part-of ?component ?vegetation))
+    :assumptions
+        (
+            (relevant growth ?vegetation)
+            (model ?component aggregated)
+        )
+    :target-participants
+        ((?stock :type stock :name component-size))
+    :postconditions
+        ((size-of ?stock ?component))
+);defModelFragment
+
+;-------------------------------------------------------------------------------
+; The sizes of the aggregation of two components equals the sum of the
+; sizes of the components.
+; (If I have some time, I would like to implement a wildcard option that could
+; match zero, one or multiple arguments in a partition. That way,
+; (partitioning $? ?child $?) ($? being the wildcard) would match every single
+; child. Wildcards would enable the modelling of a partitioning into any
+; number of components).
+;-------------------------------------------------------------------------------
+(defModelFragment size-aggregation
+    :source-participants
+        (
+            (?parent :type vegetation-live-component)
+            (?child-1 :type vegetation-live-component)
+            (?child-2 :type vegetation-live-component)
+            (?size-1 :type variable)
+            (?size-2 :type variable)
+        )
+    :structural-conditions
+        (
+            (partitioning ?parent ?child-1 ?child-2)
+            (size-of ?size-1 ?child-1)
+            (size-of ?size-2 ?child-2)
+        )
+    :target-participants
+        ((?parent-size :type variable :name aggregate-size))
+    :postconditions
+        ((== ?parent-size (+ ?size-1 ?size-2))
+            (size-of ?parent-size ?parent)
+        )
+);defModelFragment
+
+;-------------------------------------------------------------------------------
+; If a vegetation is partitioned into two component vegetations, and a variable
+; is available that represents the growth of the aggregate vegetation, a
+; partitioning coefficient enables dividing the aggregate growth between the
+; component vegetations.
+;-------------------------------------------------------------------------------
+

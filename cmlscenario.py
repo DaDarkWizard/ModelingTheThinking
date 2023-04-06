@@ -14,6 +14,7 @@ def parse_scenario(parser: CMLParser,
 
     Parsers a modelfragment object from a CML definition.
     """
+    """
     tok = stack.pop()
     assert tok[0] == TokenType.IDENTIFIER,\
            "ModelFragment given without a valid name."

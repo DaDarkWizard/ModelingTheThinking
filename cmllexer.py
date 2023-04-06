@@ -137,6 +137,7 @@ class CMLLexer(Lexer):
 
         # Comments?
         self.add_regex(LexRule(r'#([^\r])*\r', TokenType.COMMENT, None))
+        self.add_regex(LexRule(r';([^\r])*\r', TokenType.COMMENT, None))
 
         self.add_regex(LexRule(r'[^\s\)]+', TokenType.IDENTIFIER, lambda x: x))
 

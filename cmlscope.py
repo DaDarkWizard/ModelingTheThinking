@@ -4,7 +4,7 @@ All scope related functions.
 
 from typing import List, Tuple, Dict
 from cmltokens import TokenType
-from cmlclasses import Unit, Dimension, Relation, ModelFragment
+from cmlclasses import Unit, Dimension, Relation, ModelFragment, Scenario
 
 
 class CMLScope:
@@ -128,3 +128,29 @@ class CMLScope:
                           ModelFragment),\
                "Objconst is not diemension"
         return self.objconsts()[modelfragment_name]
+
+    def scenarios(self):
+        """
+        Returns a dictionary of all scenarios in scope.
+        """
+        return dict((k, v) for k, v in self.objconsts().items()
+                    if isinstance(v, Scenario))
+
+    def add_scenario(self, scenario: Scenario):
+        """
+        Adds a scenario to the scope.
+        """
+        assert scenario.name not in self.objconsts(),\
+               "objconst already exists for scenario definition."
+        self.__objconsts[scenario.name] = scenario
+
+    def get_scenario(self, scenario_name: str):
+        """
+        Gets a scenario from the scope.
+        """
+        assert scenario_name in self.objconsts(),\
+               "Unit name does not exists"
+        assert isinstance(self.objconsts()[scenario_name],
+                          Scenario),\
+               "Objconst is not diemension"
+        return self.objconsts()[scenario_name]
