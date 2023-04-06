@@ -142,6 +142,6 @@ class Scenario:
                  initially: str = "", throughout: str = ""):
         self.name = name
         self.documentation = documentation
-        self.individuals = individuals
+        self.individuals = individuals.copy()
         self.initially = initially
         self.throughout = throughout

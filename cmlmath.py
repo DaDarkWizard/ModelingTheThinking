@@ -70,17 +70,21 @@ def handle_math_function(parser: CMLParser,
             new_arg.dimension = {}
             args[i] = (TokenType.MODEL_VALUE, new_arg)
 
+
+
     func_call = None
 
-    if func_id[0] == TokenType.STAR:
-        func_call = star
-    elif func_id[0] == TokenType.DIVIDE:
-        func_call = divide
-    elif func_id[0] == TokenType.PLUS:
-        func_call = add
-    elif func_id[0] == TokenType.MINUS:
-        func_call = sub
-    else:
+    if func_id[0] == TokenType.IDENTIFIER:
+        if func_id[1] == "*":
+            func_call = star
+        elif func_id[1] == "/":
+            func_call = divide
+        elif func_id[1] == "*":
+            func_call = add
+        elif func_id[1] == "-":
+            func_call = sub
+
+    if func_call is None:
         raise Exception("Not Implemented")
 
     return func_call(parser, func_id, args)

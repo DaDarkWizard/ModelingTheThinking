@@ -1,9 +1,9 @@
 # I've added comments.
 
 (defDimension length-dimension)
-#(defDimension mass-dimension)
-#(defDimension area-dimension :documentation "Square footage perhaps?" := (expt length-dimension 2))
-#(defDimension weird-dimension := (* length-dimension (expt mass-dimension 3)))
+(defDimension mass-dimension)
+(defDimension area-dimension :documentation "Square footage perhaps?" := (expt length-dimension 2))
+(defDimension weird-dimension := (* length-dimension (expt mass-dimension 3)))
 
 (defUnit meter :dimension length-dimension)
 (defUnit centimeter := (* 0.01 meter))

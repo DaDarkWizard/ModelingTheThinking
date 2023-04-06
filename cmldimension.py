@@ -101,6 +101,8 @@ def parse_dimension_expression(parser, stack):
 
             # Clear the parenthesis off the stack.
             operator = args.pop()
+            assert operator[0] == TokenType.IDENTIFIER,\
+                   "Invalid dimension expression."
 
             # Clean the argument list
             for i, arg in enumerate(args):
@@ -121,7 +123,7 @@ def parse_dimension_expression(parser, stack):
             # At this point we have our list of arguments and
             # the operator we'll be using.
 
-            if operator[0] == TokenType.STAR:
+            if operator[1] == "*":
                 # For the star operation, we add all the values
                 # of the dimension expressions together.
                 # There can be any number of args.
@@ -133,7 +135,7 @@ def parse_dimension_expression(parser, stack):
                         else:
                             operator[1][name] = value
 
-            elif operator[0] == TokenType.DIVIDE:
+            elif operator[1] == "/":
                 # For the divide operation, we substract the second
                 # argument's values from the first.
                 # There should only be two arguments.
@@ -148,7 +150,7 @@ def parse_dimension_expression(parser, stack):
                     else:
                         operator[1][name] = -1 * value
 
-            elif operator[0] == TokenType.EXPT:
+            elif operator[1] == "expt":
                 # For the exponent operation, we should multiply
                 # all dimensions in the first arguement by the value
                 # of the second arguement.
