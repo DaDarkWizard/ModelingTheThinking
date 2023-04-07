@@ -83,6 +83,46 @@ def handle_math_function(parser: CMLParser,
             func_call = add
         elif func_id[1] == "-":
             func_call = sub
+        elif func_id[1] == "abs":
+            func_call = abs
+        elif func_id[1] == "acos":
+            func_call = acos
+        elif func_id[1] == "acosh":
+            func_call = acosh
+        elif func_id[1] == "asin":
+            func_call = asin
+        elif func_id[1] == "asinh":
+            func_call = asinh
+        elif func_id[1] == "atan":
+            func_call = atan
+        elif func_id[1] == "atanh":
+            func_call = atanh
+        elif func_id[1] == "cos":
+            func_call = cos
+        elif func_id[1] == "cosh":
+            func_call = cosh
+        elif func_id[1] == "exp":
+            func_call = exp
+        elif func_id[1] == "expt":
+            func_call = expt
+        elif func_id[1] == "log":
+            func_call = log
+        elif func_id[1] == "max":
+            func_call = max
+        elif func_id[1] == "min":
+            func_call = min
+        elif func_id[1] == "mod":
+            func_call = mod
+        elif func_id[1] == "sin":
+            func_call = sin
+        elif func_id[1] == "sinh":
+            func_call = sinh
+        elif func_id[1] == "sqrt":
+            func_call = sqrt
+        elif func_id[1] == "tan":
+            func_call = tan
+        elif func_id[1] == "tanh":
+            func_call = tanh
 
     if func_call is None:
         raise Exception("Not Implemented")
@@ -272,14 +312,57 @@ def cosh(parser, func_id, args):
     return result
 
 def exp(parser, func_id, args):
-    pass
+    assert len(args) != 1,\
+           "Improper number of args for exp operation, must be 1"
+    
+    result = args.pop(0)
+    assert result[0] == TokenType.MODEL_VALUE and\
+           isinstance(result[1], ModelValue),\
+           "Improper value in exp operation."
+
+    result[1].quantity = math.expt(result[1].quantity)
+    return result
+
 def expt(parser, func_id, args):
-    pass
+    assert len(args) < 2,\
+           "Improper number of args for expt operation, must be 2"
+    result = args.pop(0)
+    assert result[0] == TokenType.MODEL_VALUE and\
+           isinstance(result[1], ModelValue),\
+           "Improper value in expt operation."
+    val = args.pop(0)
+    assert val[0] == TokenType.MODEL_VALUE and\
+            isinstance(val[1], ModelValue),\
+            "Improper value in expt operation."
+    
+    assert dim_equal(result[1].dimension, val[1].dimension),\
+            "Dimension in expt op are not equal."
+    result[1].quantity = math.pow(result[1].quantity, val[1].quantity)
+    for _ in range(result[1].quantity):
+        result[1].dimension = dim_mul(result[1].dimension, val[1].dimension)
+
+    return result
 
 def log(parser, func_id, args):
-    pass
+    assert len(args) < 2,\
+           "Improper number of args for log operation, must be 2"
+    result = args.pop(0)
+    assert result[0] == TokenType.MODEL_VALUE and\
+           isinstance(result[1], ModelValue),\
+           "Improper value in log operation."
+    val = args.pop(0)
+    assert val[0] == TokenType.MODEL_VALUE and\
+            isinstance(val[1], ModelValue),\
+            "Improper value in log operation."
+    
+    assert dim_equal(result[1].dimension, val[1].dimension),\
+            "Dimension in log op are not equal."
+    result[1].quantity = math.log(result[1].quantity, val[1].quantity)
+    return result
 
 def max(parser, func_id, args):
+    assert len(args) == 0,\
+           "Improper number of args for max operation, must be greater than 0"
     result = args.pop(0)
     assert result[0] == TokenType.MODEL_VALUE and\
         isinstance(result[1], ModelValue),\
@@ -295,6 +378,8 @@ def max(parser, func_id, args):
     return result
 
 def min(parser, func_id, args):
+    assert len(args) == 0,\
+           "Improper number of args for min operation, must be greater than 0"
     result = args.pop(0)
     assert result[0] == TokenType.MODEL_VALUE and\
         isinstance(result[1], ModelValue),\
@@ -310,16 +395,21 @@ def min(parser, func_id, args):
     return result
 
 def mod(parser, func_id, args):
-    #TODO dimension stuffs
-    assert len(args) != 1,\
-           "Improper number of args for tan operation, must be 1"
+    # dimension should be dimension of first one
+    assert len(args) != 2,\
+           "Improper number of args for mod operation, must be 2"
     
     result = args.pop(0)
     assert result[0] == TokenType.MODEL_VALUE and\
            isinstance(result[1], ModelValue),\
-           "Improper value in tan operation."
+           "Improper value in mod operation."
+    
+    val = args.pop(0)
+    assert val[0] == TokenType.MODEL_VALUE and\
+           isinstance(val[1], ModelValue),\
+           "Improper value in mod operation."
 
-    result[1].quantity = math.tan(result[1].quantity)
+    result[1].quantity = result[1].quantity % val[1].quantity
     return result
 
 def sin(parser, func_id, args):
@@ -377,12 +467,12 @@ def tan(parser, func_id, args):
 def tanh(parser, func_id, args):
     #TODO dimension stuffs
     assert len(args) != 1,\
-           "Improper number of args for acos operation, must be 1"
+           "Improper number of args tanh acos operation, must be 1"
     
     result = args.pop(0)
     assert result[0] == TokenType.MODEL_VALUE and\
            isinstance(result[1], ModelValue),\
-           "Improper value in acos operation."
+           "Improper value in tanh operation."
 
     result[1].quantity = math.tanh(result[1].quantity)
     return result
