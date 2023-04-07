@@ -34,6 +34,24 @@ def browseFiles():
         parser = cmlparser.CMLParser()
         parser.reset()
         parser.parse_string(input_text)
+
+        # Very sloppy code but it gets the job done for now
+        dims = list(map(lambda w: w.dimension, list(parser.scope.dimensions().values())))
+        units = list(map(lambda y: y.name, list(parser.scope.units().values())))
+        unitvalues = list(map(lambda z: z.value.to_string(), list(parser.scope.units().values())))
+        modelfrags = list(map(lambda x: x.name, list(parser.scope.modelfragments().values())))
+        for x in dims:
+            bottom_tree.insert('dims', 'end', text=x)
+        i = 0
+        for x in units:
+            i = i + 1
+            bottom_tree.insert('units', 'end', i, text=x)
+        j = 0
+        for x in unitvalues:
+            j = j + 1
+            bottom_tree.insert(j, 'end', text=x)
+        for x in modelfrags:
+            bottom_tree.insert('modelfrags','end', text=x)
     
 
 def saveFile():
@@ -73,6 +91,10 @@ def diagramPane():
     diaPane.pack()
     diaPane.add(ttk.Label(diaPane, text="Diagram Pane", style="DiaPane.TLabel"))
     
+def createBox(event):
+    main_canvas.create_rectangle(event.x, event.y, event.x+80, event.y+80, width=4, fill='white')
+    print("Created Box")
+
 # create GUI
 root = Tk()
 
@@ -98,12 +120,15 @@ menu()
 # diagramPane()
 
 # Main paned window, oriented horizontal to stack items left and right
+# "pw" --> "paned window"
 pw = ttk.PanedWindow(orient='horizontal')
 
 # left paned window to hold three widgets on top of one another
+# "lpw" --> "left paned window"
 lpw = ttk.PanedWindow(orient='vertical', width=200)
 
 # Right paned window to hold main diagram viewer and info at bottom
+# "rpw" --> "right paned window"
 rpw = ttk.PanedWindow(orient='vertical')
 
 # Create basic listboxes to hold leftside elements
@@ -124,20 +149,21 @@ middle_lb.insert(2, "click type of tool to add to dia")
 middle_lb.pack()
 lpw.add(middle_lb)
 
-bottom_lb = Listbox(root)
-bottom_lb.insert(1, "List of stuff added, maybe in")
-bottom_lb.insert(2, "Photoshop layer style")
-bottom_lb.insert(3, "Will likely want ttk Treeview")
-bottom_lb.pack()
-lpw.add(bottom_lb)
+bottom_tree = ttk.Treeview(root)
+bottom_tree.insert("", 0, 'dims', text='Dimensions')
+bottom_tree.insert("", 'end', 'units', text='Units')
+bottom_tree.insert("", 'end', 'modelfrags', text='Model Fragments')
+bottom_tree.pack()
+lpw.add(bottom_tree)
 
 lpw.pack(fill=BOTH, expand=True)
 pw.add(lpw)
 
-# Right listbox to make up entire right side of window
-right_list = Listbox(root, height=35)
-right_list.pack(side=RIGHT)
-rpw.add(right_list)
+# Right Canvas to make up entire right side of window
+main_canvas = Canvas(root, height=550, bg="#9febed")
+main_canvas.bind("<Button-1>", createBox)
+main_canvas.pack(side=RIGHT)
+rpw.add(main_canvas)
 
 right_text = Label(text="Additional Info (count of entities, etc) ?")
 right_text.pack(side=RIGHT)
