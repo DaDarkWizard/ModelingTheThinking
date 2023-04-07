@@ -41,7 +41,7 @@ def parse_unit(parser: CMLParser, args: List[Tuple[TokenType, any]]):
 
         if tok[0] == TokenType.IDENTIFIER:
 
-            if tok[0] == ":DIMENSION":
+            if tok[1] == ":DIMENSION":
                 tok = args.pop()
                 assert tok[1] in parser.scope.dimensions(),\
                     "Dimension supplied does not exist"

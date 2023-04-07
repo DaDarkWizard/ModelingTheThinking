@@ -108,17 +108,19 @@ class ModelValue:
         dim_items = list(self.dimension.items())
         paren_count = 0
         x = ""
-        for i in range(len(dim_items)):
-            if i == len(dim_items) - 1:
-                x += f" (expt {dim_items[i][0]} {dim_items[i][1]})"
-                while paren_count > 0:
-                    x += ")"
-                    paren_count -= 1
-            else:
-                x += f" (* (expt {dim_items[i][0]} {dim_items[i][1]})"
-                paren_count += 1
-        x += ")"
-        return f"(* {self.quantity} {x})"
+        if len(dim_items) > 0:
+            for i in range(len(dim_items)):
+                if i == len(dim_items) - 1:
+                    x += f" (expt {dim_items[i][0]} {dim_items[i][1]})"
+                    while paren_count > 0:
+                        x += ")"
+                        paren_count -= 1
+                else:
+                    x += f" (* (expt {dim_items[i][0]} {dim_items[i][1]})"
+                    paren_count += 1
+            return f"(* {self.quantity} {x})"
+        else:
+            return f"({self.quantity})"
 
 
 # constant quantities and units are the same thing
