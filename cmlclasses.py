@@ -38,7 +38,7 @@ class ModelFragment:
         self.name = name
         self.documentation = None
         self.implication: List[Tuple[TokenType, any]] = []
-        self.sub_class_of = None
+        self.sub_class_of = []
         self.participants = None
         self.conditions = None
         self.quantities = None
@@ -133,12 +133,20 @@ class Unit:
 
 class Scenario:
 
-    def __init__(self, name: str, documentation: str = "",
-                 individuals: dict[str, object] = {},
-                 initially: str = "", throughout: str = ""):
+    def __init__(self, name: str):
         self.name = name
-        self.documentation = documentation
-        self.individuals = individuals.copy()
-        self.initially = initially
-        self.throughout = throughout
+        self.documentation = ""
+        self.individuals = {}
+        self.initially = None
+        self.throughout = None
+        self.substitutions = None
+        self.boundary = None
+        self.addons = {}
+
+class CMLObject:
+
+    def __init__(self, name: str):
+        self.name = name
+        self.type = None
+        self.quantities = {}
         self.addons = {}

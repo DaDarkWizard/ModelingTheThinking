@@ -30,7 +30,13 @@ def parse_modelfragment(parser: CMLParser,
             
             
             if tok[1] == ":SUBCLASS-OF":
-                new_model.sub_class_of = get_next_parentheses_unit(args)
+                subclassstack = get_next_parentheses_unit(args)
+                subclassstack.pop()
+                subclassstack.pop(0)
+                for cls in subclassstack:
+                    assert cls[1] in parser.scope.modelfragments(),\
+                        f"Fragment {cls[1]} undefined when defining {new_model.name} ModelFragment"
+                new_model.sub_class_of = subclassstack
 
             elif tok[1] == ":PARTICIPANTS":
                 new_model.participants = get_next_parentheses_unit(args)

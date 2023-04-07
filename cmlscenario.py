@@ -4,8 +4,9 @@ Handles all functions for modelfragment in CML
 from typing import List, Tuple
 from cmltokens import TokenType
 from cmlparser import CMLParser
-from cmlclasses import Scenario
+from cmlclasses import Scenario, CMLObject
 from stackhelpers import get_next_parentheses_unit
+from cmlobject import create_cmlobject
 
 
 def parse_scenario(parser: CMLParser,
@@ -28,24 +29,29 @@ def parse_scenario(parser: CMLParser,
 
         if tok[0] == TokenType.IDENTIFIER:
             if tok[1] == ":INDIVIDUALS":
-                new_scenario.conditions = get_next_parentheses_unit(stack)
+                indivs = get_next_parentheses_unit(stack)
+                indivs.pop()
+                indivs.pop(0)
+                while len(indivs) > 0:
+                    indiv = create_cmlobject(parser, get_next_parentheses_unit(indivs))
+                    new_scenario.individuals[indiv.name] = indiv
 
             elif tok[1] == ":INITIALLY":
                 stack.pop()
-                new_scenario.quantities = get_next_parentheses_unit(stack)
+                new_scenario.initially = get_next_parentheses_unit(stack)
 
             elif tok[1] == ":THROUGHOUT":
                 stack.pop()
-                new_scenario.attributes = get_next_parentheses_unit(stack)
+                new_scenario.throughout = get_next_parentheses_unit(stack)
 
             elif tok[1] == ":BOUNDARY":
-                new_scenario.consequences = get_next_parentheses_unit(stack)
+                new_scenario.boundary = get_next_parentheses_unit(stack)
 
             elif tok[1] == ":DOCUMENTATION":
-                new_scenario.consequences = get_next_parentheses_unit(stack)
+                new_scenario.documentation = get_next_parentheses_unit(stack)
 
             elif tok[1] == ":SUBSTITUTIONS":
-                new_scenario.consequences = get_next_parentheses_unit(stack)
+                new_scenario.substitutions = get_next_parentheses_unit(stack)
 
             else:
                 new_scenario.addons[tok[1]] = get_next_parentheses_unit(stack)

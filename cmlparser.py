@@ -29,6 +29,10 @@ class CMLParser:
     def parse_constantquantity(self, args):
         from cmlconstantquantity import parse_constantquantity
         parse_constantquantity(self, args)
+    
+    def parse_scenario(self, args):
+        from cmlscenario import parse_scenario
+        parse_scenario(self, args)
 
     def __init__(self):
         self.input = ""
@@ -104,6 +108,8 @@ class CMLParser:
                 self.parse_quantityfunction(args)
             elif func_name[1] == "DEFENTITY":
                 self.parse_modelfragment(args)
+            elif func_name[1] == "DEFSCENARIO":
+                self.parse_scenario(args)
             else:
                 raise Exception(f"Unknown function {func_name[1]}")
         else:

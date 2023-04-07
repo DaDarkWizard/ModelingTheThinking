@@ -25,6 +25,14 @@
 (defConstantQuantity Pi := (acos -1))
 
 (defModelFragment BaseClass)
+(defModelFragment Animal
+  :subclass-of (BaseClass))
+
+(defModelFragment Cat
+  :subclass-of (Animal))
+
+(defModelFragment Dog
+  :subclass-of (Animal))
 
 (defQuantityFunction mass (?x)
   :=> (physical-object ?x)
@@ -56,3 +64,12 @@
   :=> (and (stop-light ?x)
            (range (stop-light-color ?x)
                   (setof red green yellow))))
+
+(defScenario example-scenario
+  :documentation "This is just an example"
+  :individuals
+    (
+      (C :type Cat)
+      (D :type Dog)
+    )
+)

@@ -4,7 +4,7 @@ All scope related functions.
 
 from typing import List, Tuple, Dict
 from cmltokens import TokenType
-from cmlclasses import Unit, Dimension, Relation, ModelFragment, Scenario, QuantityFunction
+from cmlclasses import Unit, Dimension, Relation, ModelFragment, Scenario, QuantityFunction, CMLObject
 
 
 class CMLScope:
@@ -180,3 +180,29 @@ class CMLScope:
                           QuantityFunction),\
                "Objconst is not diemension"
         return self.objconsts()[quantityfunction_name]
+    
+    def cmlobjects(self):
+        """
+        Returns a dictionary of all cmlobjects in scope.
+        """
+        return dict((k, v) for k, v in self.objconsts().items()
+                    if isinstance(v, CMLObject))
+
+    def add_cmlobject(self, cmlobject: CMLObject):
+        """
+        Adds a cmlobject to the scope.
+        """
+        assert cmlobject.name not in self.objconsts(),\
+               "objconst already exists for quantityfunction definition."
+        self.__objconsts[cmlobject.name] = cmlobject
+
+    def get_cmlobject(self, cmlobject_name: str):
+        """
+        Gets a cmlobject from the scope.
+        """
+        assert cmlobject_name in self.objconsts(),\
+               "CMLObject name does not exists"
+        assert isinstance(self.objconsts()[cmlobject_name],
+                          CMLObject),\
+               "Objconst is not diemension"
+        return self.objconsts()[cmlobject_name]

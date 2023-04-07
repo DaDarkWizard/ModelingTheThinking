@@ -91,9 +91,6 @@ class CMLLexer(Lexer):
         self.add_regex(LexRule(r'\s+', None, None, skip=True))
 
 
-        self.add_regex(LexRule(r'defScenario', TokenType.DEF_SCENARIO, None))
-
-
         self.add_regex(LexRule(r'\(', TokenType.LEFT_PARENTHESES, None))
         self.add_regex(LexRule(r'\)', TokenType.RIGHT_PARENTHESES, None))
         self.add_regex(LexRule(r'(-|)[1-9][0-9]*(?=[\s\)]|$)', TokenType.INTEGER, lambda x: int(x)))
