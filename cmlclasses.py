@@ -14,39 +14,40 @@ class Relation:
         self.iff = iff.copy()
         self.function = function
         self.time_dependent = time_dependent
+        self.addons = {}
 
 
 class QuantityFunction:
-    def __init__(self, name: str, args: List[str], documentation: str = "", sentence: str = "", 
-                 dimension = lambda args: 0, piecewise: bool = True, step_quantity: bool = True,
-                 count_quantity: bool = True, non_numeric: bool = True):
+    def __init__(self, name: str, args: List[str]):
         self.name = name
         self.args = args
-        self.documentation = documentation
-        self.sentence = sentence
-        self.dimension = dimension
-        self.piecewise = piecewise
-        self.step_quantity = step_quantity
-        self.count_quality = count_quantity
-        self.non_numeric = non_numeric
+        self.implication = None
+        self.documentation = ""
+        self.sentence = None
+        self.dimension = None
+        self.piecewise_continuous = None
+        self.step_quantity = None
+        self.count_quantity = None
+        self.non_numeric = None
+        self.addons = {}
 
 
 
 class ModelFragment:
-    def __init__(self, name : str, documentation : str = "", sub_class_of = object,
-                participants : List[Tuple[int, str]] = [], conditions : str = "", quantities : List[Tuple[int, str]] = [],
-                attributes : List[str] = [], consequences : str = ""):
+    def __init__(self, name : str):
         self.name = name
-        self.documentation = documentation
+        self.documentation = None
         self.implication: List[Tuple[TokenType, any]] = []
-        self.sub_class_of = sub_class_of
-        self.participants = participants
-        self.conditions = conditions
-        self.quantities = quantities
-        self.attributes = attributes
-        self.consequences = consequences
+        self.sub_class_of = None
+        self.participants = None
+        self.conditions = None
+        self.quantities = None
+        self.attributes = None
+        self.consequences = None
+        self.addons = {}
+        self.substitutions = None
 
-    def to_string(sel):
+    def to_string(self):
         return f"({self.name})"
 
 class Entity:
@@ -65,6 +66,7 @@ class Dimension:
         self.name = name
         self.documentation = documentation
         self.dimension: Dict[str, int] = dimension.copy()
+        self.addons = {}
 
     def to_string(self):
         x = f"(defDimension {self.name}" +\
@@ -119,20 +121,14 @@ class ModelValue:
         return f"(* {self.quantity} {x})"
 
 
+# constant quantities and units are the same thing
 class Unit:
     def __init__(self, name: str, documentation: str = "",
                  value: ModelValue = ModelValue()):
         self.name = name
         self.documentation = documentation
         self.value = value.copy()
-
-
-class ConstantQuantity:
-    def __init__(self, name: str, documentation: str = "",
-                 value: ModelValue = ModelValue()):
-        self.name = name
-        self.documentation = documentation
-        self.value = value.copy()
+        self.addons = {}
 
 
 class Scenario:
@@ -145,3 +141,4 @@ class Scenario:
         self.individuals = individuals.copy()
         self.initially = initially
         self.throughout = throughout
+        self.addons = {}

@@ -1,65 +1,72 @@
 from stackhelpers import get_next_parentheses_unit
-from cmlclasses import Unit
-from cmlunit import parse_dimension_from_quantity_expression
+from cmlclasses import Unit, ModelValue
 from cmlparser import CMLParser
 from typing import List, Tuple
 from cmltokens import TokenType
+from cmlmath import parse_math_expression
 
 
-def parse_constant_quantity(parser: CMLParser, stack: List[Tuple[TokenType, any]]):
-    """[summary]
+def parse_constantquantity(parser: CMLParser, args: List[Tuple[TokenType, any]]):
+    """
+    [summary]
 
-        Parses a stack containing a unit description.
+    Parses a args containing a Constant Quantity description.
 
-        The stack will come in without the first parentheses or defUnit.
+    The args will come in without the first parentheses or defConstantQuantity.
 
-        ### Parameters
-        1. parser: CMLParser
-           - The cml parser we are using.
-        2. stack: List[Tuple[TokenType, any]]
-           - The stack to parse the unit from.
+    ### Parameters
+    1. parser: CMLParser
+    - The cml parser we are using.
+    2. args: List[Tuple[TokenType, any]]
+    - The args to parse the unit from.
+
     """
 
-    tok = stack.pop()
-    assert tok[0] == TokenType.IDENTIFIER, "Unit given without a name"
-    new_unit = Unit(tok[1])
-    assert new_unit.name not in parser.scope.units,\
-           f"Dimension {new_unit.name} already exists"
-    tok = stack.pop()
-    if tok[0] == TokenType.DIMENSION_ATTRIBUTE:
-        tok = stack.pop()
-        assert tok[1] in parser.scope.dimensions,\
-               "Dimension supplied does not exist"
-        new_unit.dimension = parser.scope.dimensions[tok[1]]
-        new_unit.base_unit = True
-        parser.scope.units[new_unit.name] = new_unit
-    else:
-        assert tok[0] == TokenType.ASSIGNMENT_ATTRIBUTE,\
-               "Invalid unit expression"
-        unit_expression = get_next_parentheses_unit(stack)
-        new_unit.quantity_expression = unit_expression
-        new_unit.dimension = parse_dimension_from_quantity_expression(
-                                parser, unit_expression)
+    tok = args.pop()
+    assert tok[0] == TokenType.IDENTIFIER, "Constant Quantity given without a name"
+    new_constant_quantity = Unit(tok[1])
+    assert new_constant_quantity.name not in parser.scope.units(),\
+        f"Dimension {new_constant_quantity.name} already exists"
+    
+    quantity_assigned = False
 
-        assert new_unit.dimension is not None,\
-               f"Invalid quantity expression for {new_unit.name}"
+    while len(args) > 0:
 
-        # Add the dimension to the parser.
-        parser.scope.units[new_unit.name] = new_unit
+        tok = args.pop()
 
-    return
+        if tok[0] == TokenType.IDENTIFIER:
 
-def parse_quantity_expression_value(parser, stack):
+            if tok[0] == ":DIMENSION":
+                tok = args.pop()
+                assert tok[1] in parser.scope.dimensions(),\
+                    "Dimension supplied does not exist"
+                new_unit_value = ModelValue()
+                new_unit_value.dimension = parser.scope.get_dimension(tok[1])\
+                                                 .dimension.copy()
+                new_unit_value.quantity = 1
 
-    working_stack = []
-    paren_count = 0
+                if len(new_constant_quantity.value.dimension) == 0 and\
+                   new_constant_quantity.value.quantity == 0:
+                    new_constant_quantity.value = new_unit_value
+                    new_constant_quantity.base_unit = True
+            elif tok[1] == ":=":
+                unit_expression = get_next_parentheses_unit(args)
+                unit_expression.reverse()
+                unit_value = parse_math_expression(parser, unit_expression)
+                assert unit_value[0] == TokenType.MODEL_VALUE,\
+                    "Result of unit expression should be a value."
+                new_constant_quantity.value = unit_value[1]
+                assert new_constant_quantity.value.dimension is not None,\
+                    f"Invalid quantity expression for {new_constant_quantity.name}"
+                new_constant_quantity.base_unit = False
+                quantity_assigned = True
+            else:
+                property_name = tok[1]
+                new_constant_quantity.addons[property_name] = get_next_parentheses_unit(args)
+        else:
+            raise Exception(f"Invalid unit definition for {new_constant_quantity.name}")
 
-    while len(stack) > 0:
-        tok = stack.pop()
+    assert quantity_assigned, f"Assignment required in constant definition for {new_constant_quantity.name}"
 
-        if tok[0] == TokenType.LEFT_PARENTHESES:
-            paren_count += 1
-            working_stack.append(tok)
-        elif tok[0] == TokenType.RIGHT_PARENTHESES:
-
-
+    # Add the dimension to the parser.
+    parser.scope.add_unit(new_constant_quantity)

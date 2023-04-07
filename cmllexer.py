@@ -90,56 +90,22 @@ class CMLLexer(Lexer):
         Lexer.__init__(self)
         self.add_regex(LexRule(r'\s+', None, None, skip=True))
 
-        self.add_regex(LexRule(r'defRelation', TokenType.DEF_RELATION, None))
-        self.add_regex(LexRule(r'defQuantityFunction',
-                               TokenType.DEF_QUANTITY_FUNCTION, None))
-        self.add_regex(LexRule(r'defModelFragment',
-                               TokenType.DEF_MODEL_FRAGMENT, None))
-        self.add_regex(LexRule(r'defEntity', TokenType.DEF_ENTITY, None))
-        self.add_regex(LexRule(r'defDimension', TokenType.DEF_DIMENSION, None))
-        self.add_regex(LexRule(r'defUnit', TokenType.DEF_UNIT, None))
-        self.add_regex(LexRule(r'defConstantQuantity',
-                               TokenType.DEF_CONSTANT_QUANTITY, None))
+
         self.add_regex(LexRule(r'defScenario', TokenType.DEF_SCENARIO, None))
-        self.add_regex(LexRule(r':documentation',
-                               TokenType.DOCUMENTATION_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':dimension',
-                               TokenType.DIMENSION_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':non-numeric',
-                               TokenType.NON_NUMERIC_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':piecewise-continuous',
-                               TokenType.PIECEWISE_CONTINUOUS_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':step-quantity',
-                               TokenType.STEP_QUANTITY_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':count-quantity',
-                               TokenType.COUNT_QUANTITY_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':subclass-of',
-                               TokenType.SUBCLASS_OF_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':participants',
-                               TokenType.PARTICIPANTS_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':=>', TokenType.IMPLICATION_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':<=>', TokenType.IFF_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':=', TokenType.ASSIGNMENT_ATTRIBUTE, None))
-        self.add_regex(LexRule(r':time-dependent',
-                               TokenType.TIME_DEPENDENT_ATTRIBUTE,
-                               None))
-        self.add_regex(LexRule(r':function',
-                               TokenType.FUNCTION_ATTRIBUTE,
-                               None))
 
 
         self.add_regex(LexRule(r'\(', TokenType.LEFT_PARENTHESES, None))
         self.add_regex(LexRule(r'\)', TokenType.RIGHT_PARENTHESES, None))
-        self.add_regex(LexRule(r'[1-9][0-9]*(?=[\s\)]|$)', TokenType.INTEGER, lambda x: int(x)))
+        self.add_regex(LexRule(r'(-|)[1-9][0-9]*(?=[\s\)]|$)', TokenType.INTEGER, lambda x: int(x)))
         self.add_regex(LexRule(r'[0-9]+\.[0-9]+(?=[\s\)])', TokenType.FLOAT, lambda x: float(x)))
         self.add_regex(LexRule(r'\"(\\\"|[^\"])*\"|\'(\\\'|[^\'])*\'', TokenType.STRING, lambda x: x[1:-1]))
         self.add_regex(LexRule(r'[nN][iI][lL](?=[^\s]|\))', TokenType.NIL, None))
 
         # Comments?
-        self.add_regex(LexRule(r'#([^\r])*\r', TokenType.COMMENT, None))
-        self.add_regex(LexRule(r';([^\r])*\r', TokenType.COMMENT, None))
+        self.add_regex(LexRule(r'#([^\r\n])*[\r\n]', TokenType.COMMENT, None, skip=True))
+        self.add_regex(LexRule(r';([^\r\n])*[\r\n]', TokenType.COMMENT, None, skip=True))
 
-        self.add_regex(LexRule(r'[^\s\)]+', TokenType.IDENTIFIER, lambda x: x))
+        self.add_regex(LexRule(r'[^\s\)]+', TokenType.IDENTIFIER, lambda x: x.upper()))
 
 
 

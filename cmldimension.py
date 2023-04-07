@@ -1,66 +1,72 @@
-from typing import Dict
+from typing import Dict, List, Tuple
 from stackhelpers import TokenType, get_next_parentheses_unit
 from cmlclasses import Dimension
 import cmlparser
 
 
-def parse_dimension(parser: cmlparser.CMLParser, stack):
+def parse_dimension(parser: cmlparser.CMLParser, args):
     """[summary]
 
-        Parses a stack containing a dimension description.
+        Parses a args containing a dimension description.
 
-        The stack will come in without the first parentheses or def-dimension.
+        The args will come in without the first parentheses or def-dimension.
 
         ### Parameters
         1. parser: CMLParser
            - The cml parser we are using.
-        2. stack: List[Tuple[TokenType, any]]
-           - The stack to parse the dimension from.
+        2. args: List[Tuple[TokenType, any]]
+           - The args to parse the dimension from.
     """
 
-    tok = stack.pop()
+    tok = args.pop()
     assert tok[0] == TokenType.IDENTIFIER, "Dimension given without a name"
     new_dim = Dimension(tok[1])
     assert new_dim.name not in parser.scope.dimensions(),\
            f"Dimension {new_dim.name} already exists"
-    tok = stack.pop()
 
-    if tok[0] == TokenType.DOCUMENTATION_ATTRIBUTE:
-        tok = stack.pop()
-        assert tok[0] == TokenType.STRING,\
-               "Documentation attribute given without string"
-        new_dim.documentation = tok[1]
-        tok = stack.pop()
+    while len(args) > 0:
 
-    if tok[0] == TokenType.RIGHT_PARENTHESES:
+        tok = args.pop()
+
+        if tok[0] == TokenType.IDENTIFIER:
+            if tok[1] == ":DOCUMENTATION":
+                tok = args.pop()
+                assert tok[0] == TokenType.STRING,\
+                    "Documentation attribute given without string"
+                new_dim.documentation = tok[1]
+            elif tok[1] == ":=":
+                dimension_expression = get_next_parentheses_unit(args)
+                new_dim.dimension = parse_dimension_expression(
+                                        parser,
+                                        dimension_expression
+                                    )[1]
+
+                # We do a little clean-up
+                simplify_dimension(new_dim.dimension)
+
+                # Ensure each dimension is only defined once.
+                for old_dim_name, old_dim in parser.scope.dimensions().items():
+                    all_equal = True
+                    for item_name, number in new_dim.dimension.items():
+                        if item_name not in old_dim.dimension or\
+                        number != old_dim.dimension[item_name]:
+                            all_equal = False
+                            break
+                    if all_equal:
+                        raise Exception(f"Dimension {old_dim_name} defined twice! " +
+                                        "Second: {new_dim.name}")
+            else:
+                property_name = tok[1]
+                new_dim.addons[property_name] = get_next_parentheses_unit(args)
+        else:
+            raise Exception(f"Invalid dimension definition for {new_dim.name}")
+
+    # Setup base dimensions
+    if len(new_dim.dimension) < 1:
         new_dim.dimension[new_dim.name] = 1
-        parser.scope.add_dimension(new_dim)
-    else:
-        assert tok[0] == TokenType.ASSIGNMENT_ATTRIBUTE,\
-               "Invalid dimension expression"
-        dimension_expression = get_next_parentheses_unit(stack)
-        new_dim.dimension = parse_dimension_expression(
-                                parser,
-                                dimension_expression
-                            )[1]
 
-        # We do a little clean-up
-        simplify_dimension(new_dim.dimension)
-
-        # Ensure each dimension is only defined once.
-        for old_dim_name, old_dim in parser.scope.dimensions().items():
-            all_equal = True
-            for item_name, number in new_dim.dimension.items():
-                if item_name not in old_dim.dimension or\
-                   number != old_dim.dimension[item_name]:
-                    all_equal = False
-                    break
-            if all_equal:
-                raise Exception(f"Dimension {old_dim_name} defined twice! " +
-                                "Second: {new_dim.name}")
-
-        # Add the dimension to the parser.
-        parser.scope.add_dimension(new_dim)
+    # Add the dimension to the parser.
+    parser.scope.add_dimension(new_dim)
 
 
 def parse_dimension_expression(parser, stack):
@@ -74,11 +80,16 @@ def parse_dimension_expression(parser, stack):
     def identifier_to_dimension(id):
         assert id[0] == TokenType.IDENTIFIER, "Invalid dimension given"
         assert id[1] in parser.scope.dimensions(),\
-            "Undefined dimension in dimension definision"
+            f"Undefined dimension {id[1]} in dimension definition"
         # dim_value = dict()
         # dim_value[id[1]] = 1
         return (TokenType.DIMENSION_VALUE, parser.scope.get_dimension(id[1])
                                                  .dimension.copy())
+    
+    if len(stack) == 2:
+        if stack[0] == TokenType.IDENTIFIER:
+            dim = identifier_to_dimension(stack)
+            return dim
 
     while len(stack) > 0:
         tok = stack.pop()
@@ -150,7 +161,7 @@ def parse_dimension_expression(parser, stack):
                     else:
                         operator[1][name] = -1 * value
 
-            elif operator[1] == "expt":
+            elif operator[1] == "EXPT":
                 # For the exponent operation, we should multiply
                 # all dimensions in the first arguement by the value
                 # of the second arguement.

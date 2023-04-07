@@ -83,45 +83,45 @@ def handle_math_function(parser: CMLParser,
             func_call = add
         elif func_id[1] == "-":
             func_call = sub
-        elif func_id[1] == "abs":
+        elif func_id[1] == "ABS":
             func_call = abs
-        elif func_id[1] == "acos":
+        elif func_id[1] == "ACOS":
             func_call = acos
-        elif func_id[1] == "acosh":
+        elif func_id[1] == "ACOSH":
             func_call = acosh
-        elif func_id[1] == "asin":
+        elif func_id[1] == "ASIN":
             func_call = asin
-        elif func_id[1] == "asinh":
+        elif func_id[1] == "ASINH":
             func_call = asinh
-        elif func_id[1] == "atan":
+        elif func_id[1] == "ATAN":
             func_call = atan
-        elif func_id[1] == "atanh":
+        elif func_id[1] == "ATANH":
             func_call = atanh
-        elif func_id[1] == "cos":
+        elif func_id[1] == "COS":
             func_call = cos
-        elif func_id[1] == "cosh":
+        elif func_id[1] == "COSH":
             func_call = cosh
-        elif func_id[1] == "exp":
+        elif func_id[1] == "EXP":
             func_call = exp
-        elif func_id[1] == "expt":
+        elif func_id[1] == "EXPT":
             func_call = expt
-        elif func_id[1] == "log":
+        elif func_id[1] == "LOG":
             func_call = log
-        elif func_id[1] == "max":
+        elif func_id[1] == "MAX":
             func_call = max
-        elif func_id[1] == "min":
+        elif func_id[1] == "MIN":
             func_call = min
-        elif func_id[1] == "mod":
+        elif func_id[1] == "MOD":
             func_call = mod
-        elif func_id[1] == "sin":
+        elif func_id[1] == "SIN":
             func_call = sin
-        elif func_id[1] == "sinh":
+        elif func_id[1] == "SINH":
             func_call = sinh
-        elif func_id[1] == "sqrt":
+        elif func_id[1] == "SQRT":
             func_call = sqrt
-        elif func_id[1] == "tan":
+        elif func_id[1] == "TAN":
             func_call = tan
-        elif func_id[1] == "tanh":
+        elif func_id[1] == "TANH":
             func_call = tanh
 
     if func_call is None:
@@ -129,6 +129,17 @@ def handle_math_function(parser: CMLParser,
 
     return func_call(parser, func_id, args)
 
+def try_get_model_value(stack):
+    result = stack.pop(0)
+    if result[0] == TokenType.MODEL_VALUE and\
+       isinstance(result[1], ModelValue):
+        return result
+    elif result[0] == TokenType.INTEGER:
+        ret_val = ModelValue()
+        ret_val.quantity = result[1]
+        return (TokenType.MODEL_VALUE, ret_val)
+    else:
+        raise Exception(f"ModelValue expected, not {result}")
 
 def star(parser, func_id, args):
     result = args.pop(0)
@@ -209,13 +220,10 @@ def abs(parser, func_id, args):
 
 def acos(parser, func_id, args):
     #TODO dimension stuffs
-    assert len(args) != 1,\
+    assert len(args) == 1,\
            "Improper number of args for acos operation, must be 1"
     
-    result = args.pop(0)
-    assert result[0] == TokenType.MODEL_VALUE and\
-           isinstance(result[1], ModelValue),\
-           "Improper value in acos operation."
+    result = try_get_model_value(args)
 
     result[1].quantity = math.acos(result[1].quantity)
     return result

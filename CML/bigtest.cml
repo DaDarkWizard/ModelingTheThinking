@@ -42,23 +42,23 @@
     :subclass-of (vegetation-live-component)
 )
 
-(defproperty endogenous-1
-    :source-participants ((?m :type variable))
-    :structural-conditions ((== ?m *))
-    :property (endogenous ?m)
-);defproperty
+;(defproperty endogenous-1
+;    :source-participants ((?m :type variable))
+;    :structural-conditions ((== ?m *))
+;    :property (endogenous ?m)
+;);defproperty
 
-(defproperty endogenous-2
-    :source-participants ((?m :type variable))
-    :structural-conditions ((d/dt ?m *))
-    :property (endogenous ?m)
-);defproperty
+;(defproperty endogenous-2
+;    :source-participants ((?m :type variable))
+;    :structural-conditions ((d/dt ?m *))
+;    :property (endogenous ?m)
+;);defproperty
 
-(defproperty exogenous
-    :source-participants ((?m :type variable))
-    :structural-conditions ((not (endogenous ?m)))
-    :property (exogenous ?m)
-);defproperty
+;(defproperty exogenous
+;    :source-participants ((?m :type variable))
+;    :structural-conditions ((not (endogenous ?m)))
+;    :property (exogenous ?m)
+;);defproperty
 
 ;-------------------------------------------------------------------------------
 ; If the lifeform of a vegetation is relevant, include a variable to represent

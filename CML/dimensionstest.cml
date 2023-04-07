@@ -2,6 +2,8 @@
 
 (defDimension length-dimension)
 (defDimension mass-dimension)
+(defDimension energy-dimension)
+(defDimension time-dimension)
 (defDimension area-dimension :documentation "Square footage perhaps?" := (expt length-dimension 2))
 (defDimension weird-dimension := (* length-dimension (expt mass-dimension 3)))
 
@@ -20,4 +22,37 @@
   :<=> (= ?f (- (magnitude ?t kelvin) 273.15))
   :function t)
 
+(defConstantQuantity Pi := (acos -1))
+
 (defModelFragment BaseClass)
+
+(defQuantityFunction mass (?x)
+  :=> (physical-object ?x)
+  :dimension mass-dimension
+)
+
+(defQuantityFunction kinetic-energy (?x)
+  :dimension energy-dimension)
+
+(defQuantityFunction mass-flow-rate (?x)
+  :=> (mass-flow ?x)
+  :dimension (/ mass-dimension time-dimension))
+
+(defQuantityFunction distance (?p1 ?p2)
+  :=> (and (point ?p1) (point ?p2))
+  :dimension length-dimension
+  special-value 5)
+
+(defQuantityFunction high-tide-height (?x)
+  :step-quantity t
+  :dimension length-dimension)
+
+(defQuantityFunction people-in-line (?x)
+  :count-quantity t
+  :=> (line-of-people ?x))
+
+(defQuantityFunction stop-light-color (?x)
+  :non-numeric t
+  :=> (and (stop-light ?x)
+           (range (stop-light-color ?x)
+                  (setof red green yellow))))

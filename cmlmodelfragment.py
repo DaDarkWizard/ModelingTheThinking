@@ -9,50 +9,54 @@ from stackhelpers import get_next_parentheses_unit
 
 
 def parse_modelfragment(parser: CMLParser,
-                        stack: List[Tuple[TokenType, any]]):
+                        args: List[Tuple[TokenType, any]]):
     """
     [Summary]
 
     Parsers a modelfragment object from a CML definition.
     """
-    tok = stack.pop()
+    tok = args.pop()
     assert tok[0] == TokenType.IDENTIFIER,\
            "ModelFragment given without a valid name."
 
     new_model = ModelFragment(tok[1])
-    if stack[-1][0] == TokenType.DOCUMENTATION_ATTRIBUTE:
-        stack.pop()
-        new_model.documentation = stack.pop(0)[1]
 
-    if stack[-1][0] == TokenType.IMPLICATION_ATTRIBUTE:
-        stack.pop()
-        new_model.implication = get_next_parentheses_unit(stack)
+    while len(args) > 0:
 
-    if stack[-1][0] == TokenType.SUBCLASS_OF_ATTRIBUTE:
-        stack.pop()
-        new_model.sub_class_of = get_next_parentheses_unit(stack)
+        tok = args.pop()
 
-    if stack[-1][0] == TokenType.PARTICIPANTS_ATTRIBUTE:
-        stack.pop()
-        new_model.participants = get_next_parentheses_unit(stack)
+        if tok[0] == TokenType.IDENTIFIER:
 
-    if stack[-1][0] == TokenType.IDENTIFIER and\
-       stack[-1][1] == ":conditions":
-        stack.pop()
-        new_model.conditions = get_next_parentheses_unit(stack)
+            
+            
+            if tok[1] == ":SUBCLASS-OF":
+                new_model.sub_class_of = get_next_parentheses_unit(args)
 
-    if stack[-1][0] == TokenType.IDENTIFIER and\
-       stack[-1][1] == ":quantities":
-        stack.pop()
-        new_model.quantities = get_next_parentheses_unit(stack)
+            elif tok[1] == ":PARTICIPANTS":
+                new_model.participants = get_next_parentheses_unit(args)
 
-    if stack[-1][0] == TokenType.IDENTIFIER and\
-       stack[-1][1] == ":attributes":
-        stack.pop()
-        new_model.attributes = get_next_parentheses_unit(stack)
+            elif tok[1] == ":CONDITIONS":
+                new_model.conditions = get_next_parentheses_unit(args)
 
-    if stack[-1][0] == TokenType.IDENTIFIER and\
-       stack[-1][1] == ":consequences":
-        new_model.consequences = get_next_parentheses_unit(stack)
+            elif tok[1] == ":QUANTITIES":
+                new_model.quantities = get_next_parentheses_unit(args)
+
+            elif tok[1] == ":ATTRIBUTES":
+                new_model.attributes = get_next_parentheses_unit(args)
+
+            elif tok[1] == ":CONSEQUENCES":
+                new_model.consequences = get_next_parentheses_unit(args)
+            
+            elif tok[1] == ":DOCUMENTATION":
+                new_model.documentation = args.pop(0)[1]
+            
+            elif tok[1] == ":SUBSTITUTIONS":
+                new_model.substitutions = get_next_parentheses_unit(args)
+            
+            else:
+                property_name = tok[1]
+                new_model.addons[property_name] = get_next_parentheses_unit(args)
+        else:
+            raise Exception(f"Invalid unit definition for {new_model.name}")
 
     parser.scope.add_modelfragment(new_model)
