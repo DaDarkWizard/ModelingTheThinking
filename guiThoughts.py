@@ -2,6 +2,7 @@ import cmlparser
 import os
 from tkinter import *
 from tkinter import ttk
+from PIL import Image, ImageTk # If you're getting an error at this line, please install the Pillow module -> https://pillow.readthedocs.io/en/stable/installation.html
 
 
 # Be able to use all 18 widgets in Tkinter 
@@ -53,7 +54,6 @@ def browseFiles():
         for x in modelfrags:
             bottom_tree.insert('modelfrags','end', text=x)
     
-
 def saveFile():
     hi = 0
 
@@ -94,6 +94,48 @@ def diagramPane():
 def createBox(event):
     main_canvas.create_rectangle(event.x, event.y, event.x+80, event.y+80, width=4, fill='white')
     print("Created Box")
+    
+def toolSwitchSelect():
+    # Run when switch tool is selected
+    global selectToggle
+    global moveToggle
+    if selectToggle: # Turn select tool off
+        selectOff()
+
+    elif not selectToggle: # Turn select tool on, turn all others off
+        moveOff()
+        selectOn()
+
+def toolSwitchMove():
+    # Run when move tool is selected
+    global selectToggle
+    global moveToggle
+    if moveToggle: # Turn move tool off
+        moveOff()
+
+    elif not moveToggle: # Turn move tool on, turn all others off
+        selectOff()
+        moveOn()
+        
+def selectOn():
+    global selectToggle
+    selectBtn.config(bg='green')
+    selectToggle = True
+
+def selectOff():
+    global selectToggle
+    selectBtn.config(bg='grey')
+    selectToggle = False
+
+def moveOn():
+    global moveToggle
+    moveBtn.config(bg='green')
+    moveToggle = True
+    
+def moveOff():
+    global moveToggle
+    moveBtn.config(bg='grey')
+    moveToggle = False
 
 # create GUI
 root = Tk()
@@ -134,14 +176,33 @@ rpw = ttk.PanedWindow(orient='vertical')
 # Create basic listboxes to hold leftside elements
 # Later will be different types of tkinter widgets. https://tkdocs.com/tutorial/widgets.html
 # The height of listboxes is number of text elements to show, not pixels
-top_lb = Listbox(root, height=8)
-top_lb.insert(1, "Tools to use")
-top_lb.insert(2, "  Drag and Move Tool")
-top_lb.insert(3, "  Add Relations")
-top_lb.insert(4, "  Select a bunch at once tool")
-top_lb.insert(5, "  etc")
-top_lb.pack()
-lpw.add(top_lb)
+# top_lb = Listbox(root, height=8)
+# top_lb.insert(1, "Tools to use")
+# top_lb.insert(2, "  Drag and Move Tool")
+# top_lb.insert(3, "  Add Relations")
+# top_lb.insert(4, "  Select a bunch at once tool")
+# top_lb.insert(5, "  etc")
+# top_lb.pack()
+# lpw.add(top_lb)
+
+# Load visual assets for buttons
+simg = Image.open('assets\cursor-png-1127.png').resize((30,30))
+mimg = Image.open('assets\Move_icon.svg.png').resize((30,30))
+
+# Set default state of tools
+selectToggle = False
+moveToggle = False
+
+# Create toolbox
+toolBox = Frame(root, bd=1, relief=SUNKEN)   
+selectImg = ImageTk.PhotoImage(simg)
+selectBtn = Button(toolBox, relief=FLAT,text='SELECT', bg='grey', command=toolSwitchSelect, image= selectImg)
+selectBtn.pack(side=LEFT, padx=2, pady=2)    
+moveImg = ImageTk.PhotoImage(mimg)
+moveBtn = Button(toolBox, relief=FLAT, text='MOVE', bg='grey', command=toolSwitchMove, image=moveImg)
+moveBtn.pack(side=LEFT, padx=2, pady=2)
+toolBox.pack(side=TOP, fill=X)
+lpw.add(toolBox)
 
 middle_lb = Listbox(root, height=8)
 middle_lb.insert(1, "Drag and drop area to simply")
