@@ -32,6 +32,12 @@ class TokenType(Enum):
     DEF_SCENARIO = 20
     COMMENT = 21
     MODEL_VALUE = 22
+    QUOTE = 25
+
+    # CURRENT LISP TYPES
+    RAW_CODE = 23
+    MACRO = 24
+    # END
 
     DOCUMENTATION_ATTRIBUTE = 170
 

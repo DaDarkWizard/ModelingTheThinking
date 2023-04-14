@@ -3,6 +3,7 @@ from cmltokens import TokenType
 # Allows type hinting for lambda functions
 from typing import Callable
 from typing import List, Tuple
+from cmlclasses import ModelValue
 
 import re
 
@@ -91,10 +92,11 @@ class CMLLexer(Lexer):
         self.add_regex(LexRule(r'\s+', None, None, skip=True))
 
 
+        self.add_regex(LexRule(r'\'', TokenType.QUOTE, None))
         self.add_regex(LexRule(r'\(', TokenType.LEFT_PARENTHESES, None))
         self.add_regex(LexRule(r'\)', TokenType.RIGHT_PARENTHESES, None))
-        self.add_regex(LexRule(r'(-|)[1-9][0-9]*(?=[\s\)]|$)', TokenType.INTEGER, lambda x: int(x)))
-        self.add_regex(LexRule(r'[0-9]+\.[0-9]+(?=[\s\)])', TokenType.FLOAT, lambda x: float(x)))
+        self.add_regex(LexRule(r'(-|)[1-9][0-9]*(?=[\s\)]|$)', TokenType.MODEL_VALUE, lambda x: ModelValue(int(x))))
+        self.add_regex(LexRule(r'(-|)[0-9]+\.[0-9]+(?=[\s\)])', TokenType.MODEL_VALUE, lambda x: ModelValue(float(x))))
         self.add_regex(LexRule(r'\"(\\\"|[^\"])*\"|\'(\\\'|[^\'])*\'', TokenType.STRING, lambda x: x[1:-1]))
         self.add_regex(LexRule(r'[nN][iI][lL](?=[^\s]|\))', TokenType.NIL, None))
 

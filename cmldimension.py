@@ -172,7 +172,7 @@ def parse_dimension_expression(parser, stack):
                 multiplier = args.pop()
 
                 for name, value in operator[1].items():
-                    operator[1][name] = operator[1][name] * multiplier[1]
+                    operator[1][name] = operator[1][name] * multiplier[1].quantity
             else:
                 raise Exception("Invalid dimension expression")
 

@@ -217,8 +217,8 @@ rpw = ttk.PanedWindow(orient='vertical')
 # lpw.add(top_lb)
 
 # Load visual assets for buttons
-simg = Image.open('assets\cursor-png-1127.png').resize((30,30))
-mimg = Image.open('assets\Move_icon.svg.png').resize((30,30))
+simg = Image.open('assets/cursor-png-1127.png').resize((30,30))
+mimg = Image.open('assets/Move_icon.svg.png').resize((30,30))
 
 # Set default state of tools
 selectToggle = False
@@ -257,7 +257,7 @@ lpw.pack(fill=BOTH, expand=True)
 pw.add(lpw)
 
 # Right Canvas to make up entire right side of window
-boximg = Image.open('assets\\block-asset.png')
+boximg = Image.open('assets/block-asset.png')
 box_image = ImageTk.PhotoImage(boximg)
 main_canvas = Canvas(root, height=550, bg="#9febed")
 main_canvas.bind("<Button-1>", createBox)

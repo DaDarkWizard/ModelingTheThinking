@@ -94,8 +94,8 @@ class Dimension:
 
 
 class ModelValue:
-    def __init__(self):
-        self.quantity = 0
+    def __init__(self, quantity = 0):
+        self.quantity = quantity
         self.dimension = dict()
 
     def copy(self):

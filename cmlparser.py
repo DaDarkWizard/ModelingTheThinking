@@ -2,7 +2,7 @@ from cmllexer import CMLLexer
 from typing import List, Tuple
 from cmltokens import TokenType
 from cmlscope import CMLScope
-from stackhelpers import get_rest_of_parentheses
+from stackhelpers import get_rest_of_parentheses, get_lisp_quoted_list
 
 
 class CMLParser:
@@ -34,10 +34,17 @@ class CMLParser:
         from cmlscenario import parse_scenario
         parse_scenario(self, args)
 
-    def __init__(self):
+    def __init__(self, parser = None):
         self.input = ""
         self.lexer = CMLLexer()
         self.scope: CMLScope = CMLScope()
+        self.builtin_functions = {}
+        import cmlmath
+        for k, v in cmlmath.init_math_functions().items():
+            self.builtin_functions[k] = v
+
+        if parser is not None:
+            self.scope.parent = parser.scope
 
     def reset(self):
         self.scope = CMLScope()
@@ -76,10 +83,19 @@ class CMLParser:
         while True:
 
             if tok[0] == TokenType.LEFT_PARENTHESES:
+                # Get the rest of everything enclosed in the parentheses.
                 item_stack = get_rest_of_parentheses(input_stack)
+
+                # Get the name of the function being called.
                 func_name = item_stack.pop()
+
+                # Remove the trailing parenthesis.
                 item_stack.pop(0)
+
+                # Handle the function.
                 top_level = self.handle_func(func_name, item_stack)
+            elif tok[0] == TokenType.QUOTE:
+                return get_lisp_quoted_list(input_stack)
             elif tok[0] == TokenType.END:
                 break
             else:
@@ -89,27 +105,36 @@ class CMLParser:
                 break
             else:
                 tok = input_stack.pop()
-        
+
         return top_level
+
 
     def handle_func(self, func_name, args):
         if func_name[0] == TokenType.IDENTIFIER:
             if func_name[1] == "DEFDIMENSION":
                 self.parse_dimension(args)
+                return (TokenType.NIL, None)
             elif func_name[1] == "DEFUNIT":
                 self.parse_unit(args)
+                return (TokenType.NIL, None)
             elif func_name[1] == "DEFRELATION":
                 self.parse_relation(args)
+                return (TokenType.NIL, None)
             elif func_name[1] == "DEFMODELFRAGMENT":
                 self.parse_modelfragment(args)
+                return (TokenType.NIL, None)
             elif func_name[1] == "DEFCONSTANTQUANTITY":
                 self.parse_constantquantity(args)
+                return (TokenType.NIL, None)
             elif func_name[1] == "DEFQUANTITYFUNCTION":
                 self.parse_quantityfunction(args)
+                return (TokenType.NIL, None)
             elif func_name[1] == "DEFENTITY":
                 self.parse_modelfragment(args)
+                return (TokenType.NIL, None)
             elif func_name[1] == "DEFSCENARIO":
                 self.parse_scenario(args)
+                return (TokenType.NIL, None)
             else:
                 raise Exception(f"Unknown function {func_name[1]}")
         else:

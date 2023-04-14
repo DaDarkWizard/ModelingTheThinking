@@ -1,4 +1,5 @@
-from cmltokens import *
+from cmltokens import TokenType
+from lispclasses import Cons
 
 def get_rest_of_parentheses(stack):
     paren_count = 1
@@ -28,5 +29,24 @@ def get_next_parentheses_unit(stack):
             ret_val.append(rest_stack.pop())
         ret_val.reverse()
         return ret_val
+    elif stack[-1][0] == TokenType.QUOTE:
+        print("TODO")
+        raise Exception("TODO")
     else:
         return stack.pop()
+
+
+def get_lisp_quoted_list(stack):
+    """
+    Returns a cons of the rest of list.
+    The first element on the stack should
+    be the the element after the opening parenthesis.
+    """
+    ret_val = Cons()
+    ret_val.first = stack.pop()
+    if ret_val.first[0] == TokenType.LEFT_PARENTHESES:
+        ret_val.first = get_lisp_quoted_list(stack)
+    if ret_val.first[0] == TokenType.RIGHT_PARENTHESES:
+        return (TokenType.NIL, None)
+    ret_val.second = get_lisp_quoted_list(stack)
+    return (TokenType.CONS, ret_val)

@@ -10,6 +10,34 @@ from cmlclasses import ModelValue
 from cmldimension import dim_mul, dim_div, dim_equal
 import math
 
+def init_math_functions():
+    math_functions = {}
+
+    math_functions["*"] = star
+    math_functions["/"] = divide
+    math_functions["*"] = add
+    math_functions["-"] = sub
+    math_functions["ABS"] = abs
+    math_functions["ACOS"] = acos
+    math_functions["ACOSH"] = acosh
+    math_functions["ASIN"] = asin
+    math_functions["ASINH"] = asinh
+    math_functions["ATAN"] = atan
+    math_functions["ATANH"] = atanh
+    math_functions["COS"] = cos
+    math_functions["COSH"] = cosh
+    math_functions["EXP"] = exp
+    math_functions["EXPT"] = expt
+    math_functions["LOG"] = log
+    math_functions["MAX"] = max
+    math_functions["MIN"] = min
+    math_functions["MOD"] = mod
+    math_functions["SIN"] = sin
+    math_functions["SINH"] = sinh
+    math_functions["SQRT"] = sqrt
+    math_functions["TAN"] = tan
+    math_functions["TANH"] = tanh
+    return math_functions
 
 def parse_math_expression(parser: CMLParser,
                           stack: List[Tuple[TokenType, any]]):

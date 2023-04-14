@@ -4,7 +4,9 @@ All scope related functions.
 
 from typing import List, Tuple, Dict
 from cmltokens import TokenType
-from cmlclasses import Unit, Dimension, Relation, ModelFragment, Scenario, QuantityFunction, CMLObject
+from cmlclasses import Unit, Dimension, Relation, ModelFragment,\
+        Scenario, QuantityFunction, CMLObject
+from lispclasses import Macro
 
 
 class CMLScope:
@@ -154,7 +156,7 @@ class CMLScope:
                           Scenario),\
                "Objconst is not diemension"
         return self.objconsts()[scenario_name]
-    
+
     def quantityfunctions(self):
         """
         Returns a dictionary of all quantityfunctions in scope.
@@ -180,7 +182,7 @@ class CMLScope:
                           QuantityFunction),\
                "Objconst is not diemension"
         return self.objconsts()[quantityfunction_name]
-    
+
     def cmlobjects(self):
         """
         Returns a dictionary of all cmlobjects in scope.
@@ -204,5 +206,29 @@ class CMLScope:
                "CMLObject name does not exists"
         assert isinstance(self.objconsts()[cmlobject_name],
                           CMLObject),\
-               "Objconst is not diemension"
+               "Objconst is not cmlobject"
         return self.objconsts()[cmlobject_name]
+
+    def lispobjects(self):
+        """
+        Returns a dictionary of all lispobjects in scope.
+        """
+        return dict((k, v) for k, v in self.objconsts().items()
+                    if isinstance(v, Tuple))
+
+    def set_lispobject(self, name, lispobject: Tuple):
+        """
+        Adds a lispobject to the scope.
+        """
+        self.__objconsts[name] = lispobject
+
+    def get_lispobject(self, name: str):
+        """
+        Gets a lispobject from the scope.
+        """
+        assert name in self.objconsts(),\
+               f"Object {name} does not exists"
+        assert isinstance(self.objconsts()[name],
+                          Tuple),\
+               f"Object {name} is not a lisp object"
+        return self.objconsts()[name]
