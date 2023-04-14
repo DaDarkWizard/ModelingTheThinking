@@ -13,6 +13,9 @@ from PIL import Image, ImageTk # If you're getting an error at this line, please
 from tkinter import filedialog # To be able to open file explorer and open a file
 from tkinter.messagebox import showinfo # For dialogue box
 
+# Define tags to be used for items in the canvas
+entity_tag = "entity"
+
 def createFile():
     hi = 0
     
@@ -92,12 +95,53 @@ def diagramPane():
     diaPane.pack()
     diaPane.add(ttk.Label(diaPane, text="Diagram Pane", style="DiaPane.TLabel"))
     
-def createBox(event):
-    # main_canvas.create_rectangle(event.x, event.y, event.x+80, event.y+80, width=4, fill='white')
+def runTool(event):
+    """Determines which tool should be run on click event on canvas\n
+    Runs either the select or move tool
+    
+    Args:
+        event (_type_): on_click event
+    """    
+    global selectToggle
+    global moveToggle
     global createToggle
     
-    if createToggle:
-        main_canvas.create_image(event.x, event.y, image=box_image)
+    if selectToggle:
+        toolSelect(event)
+    elif moveToggle:
+        toolMove(event)
+    # elif createToggle:
+    #     toolCreate(event)
+
+def toolSelect(event):
+    print('Got object click', event.x, event.y)
+
+def toolMove(event):
+    hi=0
+
+def toolCreate(event):
+    """Contains the functions for the creation tool
+
+    Args:
+        event (_type_): _description_
+    """    
+    
+    # main_canvas.create_rectangle(event.x, event.y, event.x+80, event.y+80, width=4, fill='white')
+    global createToggle
+    global entity_tag
+    
+    if createToggle: # Run the creation tool if it's enabled
+        
+        entity = Frame(main_canvas, relief=RIDGE, borderwidth=2)
+        entity_label = Label(entity, text='ENTITY NAME: ', justify=LEFT)
+        entity_label.pack(side=LEFT, fill=X)
+        entity_entry = Entry(entity)
+        entity_entry.pack(side=LEFT, fill=X)
+        
+        main_canvas.create_window(event.x, event.y, window=entity, anchor=NW, width=200, height=100, tags=entity_tag)
+        entity.bind('<Button-1>', runTool)
+        entity.bind('<B1-Motion>', runTool)
+        
         print("Created Box")
     
 def toolSwitchSelect():
@@ -228,7 +272,7 @@ createToggle = False
 # Create toolbox
 toolBox = Frame(root, bd=1, relief=SUNKEN)   
 selectImg = ImageTk.PhotoImage(simg)
-selectBtn = Button(toolBox, relief=FLAT,text='SELECT', bg='grey', command=toolSwitchSelect, image= selectImg)
+selectBtn = Button(toolBox, relief=FLAT,text='SELECT', bg='grey', command=toolSwitchSelect, image=selectImg)
 selectBtn.pack(side=LEFT, padx=2, pady=2)    
 moveImg = ImageTk.PhotoImage(mimg)
 moveBtn = Button(toolBox, relief=FLAT, text='MOVE', bg='grey', command=toolSwitchMove, image=moveImg)
@@ -260,7 +304,8 @@ pw.add(lpw)
 boximg = Image.open('assets/block-asset.png')
 box_image = ImageTk.PhotoImage(boximg)
 main_canvas = Canvas(root, height=550, bg="#9febed")
-main_canvas.bind("<Button-1>", createBox)
+main_canvas.bind("<Button-1>", toolCreate)
+main_canvas.tag_bind(entity_tag, '<Button-1>', runTool, add=False)
 main_canvas.pack(side=RIGHT)
 rpw.add(main_canvas)
 
