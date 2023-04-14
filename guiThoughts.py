@@ -2,6 +2,7 @@ import cmlparser
 import os
 from tkinter import *
 from tkinter import ttk
+import tkinter.font as font
 from PIL import Image, ImageTk # If you're getting an error at this line, please install the Pillow module -> https://pillow.readthedocs.io/en/stable/installation.html
 
 
@@ -92,7 +93,8 @@ def diagramPane():
     diaPane.add(ttk.Label(diaPane, text="Diagram Pane", style="DiaPane.TLabel"))
     
 def createBox(event):
-    main_canvas.create_rectangle(event.x, event.y, event.x+80, event.y+80, width=4, fill='white')
+    # main_canvas.create_rectangle(event.x, event.y, event.x+80, event.y+80, width=4, fill='white')
+    main_canvas.create_image(event.x, event.y, image=box_image)
     print("Created Box")
     
 def toolSwitchSelect():
@@ -116,6 +118,10 @@ def toolSwitchMove():
     elif not moveToggle: # Turn move tool on, turn all others off
         selectOff()
         moveOn()
+
+def toolSwitchCreate():
+    # Run when create tool is selected
+    hi = 0
         
 def selectOn():
     global selectToggle
@@ -192,6 +198,7 @@ mimg = Image.open('assets\Move_icon.svg.png').resize((30,30))
 # Set default state of tools
 selectToggle = False
 moveToggle = False
+createToggle = False
 
 # Create toolbox
 toolBox = Frame(root, bd=1, relief=SUNKEN)   
@@ -201,6 +208,10 @@ selectBtn.pack(side=LEFT, padx=2, pady=2)
 moveImg = ImageTk.PhotoImage(mimg)
 moveBtn = Button(toolBox, relief=FLAT, text='MOVE', bg='grey', command=toolSwitchMove, image=moveImg)
 moveBtn.pack(side=LEFT, padx=2, pady=2)
+createImage = PhotoImage(width=1,height=1) # Create invisible 1x1 image
+createBtn = Button(toolBox, relief=FLAT, text='CREATE', bg='grey', command=toolSwitchCreate, image=createImage, width=30, height=30, compound=LEFT)
+createBtn['font'] = font.Font(size=6)
+createBtn.pack(side=LEFT, padx=2, pady=2)
 toolBox.pack(side=TOP, fill=X)
 lpw.add(toolBox)
 
@@ -221,6 +232,8 @@ lpw.pack(fill=BOTH, expand=True)
 pw.add(lpw)
 
 # Right Canvas to make up entire right side of window
+boximg = Image.open('assets\\block-asset.png')
+box_image = ImageTk.PhotoImage(boximg)
 main_canvas = Canvas(root, height=550, bg="#9febed")
 main_canvas.bind("<Button-1>", createBox)
 main_canvas.pack(side=RIGHT)
