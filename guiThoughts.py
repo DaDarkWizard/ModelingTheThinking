@@ -94,34 +94,49 @@ def diagramPane():
     
 def createBox(event):
     # main_canvas.create_rectangle(event.x, event.y, event.x+80, event.y+80, width=4, fill='white')
-    main_canvas.create_image(event.x, event.y, image=box_image)
-    print("Created Box")
+    global createToggle
+    
+    if createToggle:
+        main_canvas.create_image(event.x, event.y, image=box_image)
+        print("Created Box")
     
 def toolSwitchSelect():
     # Run when switch tool is selected
     global selectToggle
     global moveToggle
+    global createToggle
     if selectToggle: # Turn select tool off
         selectOff()
 
     elif not selectToggle: # Turn select tool on, turn all others off
         moveOff()
+        createOff()
         selectOn()
 
 def toolSwitchMove():
     # Run when move tool is selected
     global selectToggle
     global moveToggle
+    global createToggle
     if moveToggle: # Turn move tool off
         moveOff()
 
     elif not moveToggle: # Turn move tool on, turn all others off
         selectOff()
+        createOff()
         moveOn()
 
 def toolSwitchCreate():
     # Run when create tool is selected
-    hi = 0
+    global selectToggle
+    global moveToggle
+    global createToggle
+    if createToggle: # Turn create tool off
+        createOff()
+    elif not createToggle:
+        selectOff()
+        moveOff()
+        createOn()
         
 def selectOn():
     global selectToggle
@@ -143,6 +158,16 @@ def moveOff():
     moveBtn.config(bg='grey')
     moveToggle = False
 
+def createOn():
+    global createToggle
+    createBtn.config(bg='green')
+    createToggle = True
+    
+def createOff():
+    global createToggle
+    createBtn.config(bg='grey')
+    createToggle = False
+    
 # create GUI
 root = Tk()
 
