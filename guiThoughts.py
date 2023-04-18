@@ -16,6 +16,8 @@ from tkinter.messagebox import showinfo # For dialogue box
 # Define tags to be used for items in the canvas
 entity_tag = "entity"
 
+selected_list = list()
+
 def createFile():
     hi = 0
     
