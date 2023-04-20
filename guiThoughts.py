@@ -149,16 +149,13 @@ def toolMove():
 
     # If the closest item is a window (entity), move it. Otherwise, do nothing
     if (main_canvas.type(item) == 'window'):
-        #print("lines: ", len(lines), ", anchors_x: ", len(item_anchors_x))
         # Find all arrows connected to object and move with the object (entity) as it moves
         # Currently only works on arrows connected to left and top anchor points, and will become disconnected if window moves too quickly
+        main_canvas.move(item, getX() - main_canvas.coords(item)[0] - 100, getY() - main_canvas.coords(item)[1] - 50)
         for i in range(len(lines)):
             if (lines[i][0] == main_canvas.gettags(item)[0]):
                 main_canvas.coords(lines[i][1], main_canvas.coords(item)[0]+lines[i][2][0], main_canvas.coords(item)[1]+lines[i][2][1], main_canvas.coords(lines[i][1])[2], main_canvas.coords(lines[i][1])[3])
-            #print(lines[i])
-        #print(lines[0][1])
-        #print("anchors: ", ent_x - 100, ent_y, ent_x, ent_y - 50, ent_x + 100, ent_y, ent_x, ent_y + 50)
-        main_canvas.move(item, getX() - main_canvas.coords(item)[0] - 100, getY() - main_canvas.coords(item)[1] - 50)
+
         tag = main_canvas.gettags(item)[0]
         tag_no = int(''.join(x for x in tag if x.isdigit()))
 
@@ -224,8 +221,7 @@ def toolRelation(event):
             if (math.dist(dist_points, event_points) < closest):
                 closest = math.dist(dist_points, event_points)
                 line_points = dist_points
-                print(line_points, "... ", closest, "... ", dist_points, "... ", event_points)
-                #print("relatives: ", rel_x, ", ", rel_y)
+                #print(line_points, "... ", closest, "... ", dist_points, "... ", event_points)
         # Get closest entity
         item = main_canvas.find_closest(getX(), getY())[0]
         relative = [line_points[0]-main_canvas.coords(item)[0], line_points[1]-main_canvas.coords(item)[1]]
