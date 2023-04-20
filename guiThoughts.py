@@ -3,11 +3,9 @@ import os
 from tkinter import *
 from tkinter import ttk
 import tkinter.font as font
+import math
+import time
 from PIL import Image, ImageTk # If you're getting an error at this line, please install the Pillow module -> https://pillow.readthedocs.io/en/stable/installation.html
-import win32api as win32 # pip install pywin32
-
-
-
 
 # Be able to use all 18 widgets in Tkinter 
 # Button, Checkbutton, Entry, Frame, Label, LabelFrame, Menubutton, PanedWindow, Radiobutton, Scale, Scrollbar, Spinbox, Combobox, Notebook, Progressbar, Separator, Sizegrip and Treeview
@@ -23,6 +21,10 @@ selected_list = list()
 
 entities = []
 entity_no = 0
+arrow_anchors_x = []
+arrow_anchors_y = []
+lines = []
+line_points = []
 
 def createFile():
     hi = 0
@@ -113,6 +115,7 @@ def runTool(event):
     global selectToggle
     global moveToggle
     global createToggle
+    global arrowToggle
     
     if selectToggle:
         toolSelect(event)
@@ -120,6 +123,8 @@ def runTool(event):
         toolMove()
     elif createToggle:
         toolCreate(event)
+    elif arrowToggle:
+        toolRelation(event)
 
 def getX():
     x = main_canvas.winfo_pointerx()
@@ -138,8 +143,42 @@ def toolSelect(event):
     print('Got object click', event.x, event.y)
 
 def toolMove():
+    global arrow_anchors_x
+    global arrow_anchors_y
     item = main_canvas.find_closest(getX(), getY())[0]
-    main_canvas.move(item, getX() - main_canvas.coords(item)[0] - 100, getY() - main_canvas.coords(item)[1] - 50)
+
+    # If the closest item is a window (entity), move it. Otherwise, do nothing
+    if (main_canvas.type(item) == 'window'):
+        ent_x = main_canvas.coords(item)[0]
+        ent_y = main_canvas.coords(item)[1]
+        item_anchors_x = [ent_x - 100, ent_x, ent_x + 100, ent_x]
+        item_anchors_y = [ent_y, ent_y - 50, ent_y, ent_y + 50]
+        x_vals = [100, 0, 0, -100]
+        y_vals = [0, 50, -50, 0]
+        #print("lines: ", len(lines), ", anchors_x: ", len(item_anchors_x))
+        # Find all arrows connected to object and move with the object (entity) as it moves
+        # Currently only works on arrows connected to left and top anchor points, and will become disconnected if window moves too quickly
+        for i in range(len(lines)):
+            for j in range(len(item_anchors_x)):
+                #print("line start x: ", main_canvas.coords(lines[i])[0], ", anchor x: ", item_anchors_x[j], ", line start y: ", main_canvas.coords(lines[i])[1], ", anchor y: ", item_anchors_y[j])
+                if (main_canvas.coords(lines[i])[0] == item_anchors_x[j] and main_canvas.coords(lines[i])[1] == item_anchors_y[j]):
+                    #print("positive at j ", j)
+                    #print("positive anchor at x: ", main_canvas.coords(item)[0]+x_vals[j], ", ", main_canvas.coords(item)[1]+y_vals[j])
+                    main_canvas.coords(lines[i], getX()+x_vals[j], getY()+y_vals[j], main_canvas.coords(lines[i])[2], main_canvas.coords(lines[i])[3])
+        #print("anchors: ", ent_x - 100, ent_y, ent_x, ent_y - 50, ent_x + 100, ent_y, ent_x, ent_y + 50)
+        main_canvas.move(item, getX() - main_canvas.coords(item)[0] - 100, getY() - main_canvas.coords(item)[1] - 50)
+        tag = main_canvas.gettags(item)[0]
+        tag_no = int(''.join(x for x in tag if x.isdigit()))
+
+        # Move the anchor points of a window if it is moved so that arrows can be added in proper place
+        pos = [tag_no*4-4, tag_no*4-3, tag_no*4-2, tag_no*4-1]
+        print(pos[0], pos[1], pos[2], pos[3])
+        x_target = [getX()-100, getX(), getX()+100, getX()]
+        y_target = [getY(), getY()-50, getY(), getY()+50]
+        for a,b in zip(pos, x_target):
+            arrow_anchors_x[a] = b
+        for a,b in zip(pos, y_target):
+            arrow_anchors_y[a] = b 
     #print("moved item to ", getX(), "  ", getY())
 
 def toolCreate(event):
@@ -153,6 +192,8 @@ def toolCreate(event):
     global createToggle
     global entity_tag
     global entity_no
+    global arrow_anchors_x
+    global arrow_anchors_y
     
     if createToggle: # Run the creation tool if it's enabled
         entity_no = entity_no + 1
@@ -163,23 +204,59 @@ def toolCreate(event):
         entity_entry.pack(side=LEFT, fill=X)
         
         entity_item = main_canvas.create_window(event.x-100, event.y-50, window=entity, anchor=NW, width=200, height=100, tags=entity_tag+str(entity_no))
+        #print("created entity at ", event.x-100, ", ", event.y-50)
+        #print("populated anchor points: ", event.x-100, event.y, event.x, event.y-50, event.x+100, event.y, event.x, event.y+50)
+
+        # Create anchor points for relation arrows to attach to
+        arrow_anchors_x.extend([event.x-100, event.x, event.x+100, event.x])
+        arrow_anchors_y.extend([event.y, event.y-50, event.y, event.y+50])
+
         entities.append(entity_item)
         entity.bind('<Button-1>', runTool)
         entity.bind('<B1-Motion>', runTool)
         
         print("Created Box")
     
+def toolRelation(event):
+    if arrowToggle:
+        global arrow_anchors_x
+        global arrow_anchors_y
+        global line_points
+        global lines
+        closest = 999
+        dist_points = []
+        event_points = [getX(), getY()]
+        # Get closest anchor point
+        for i in range(len(arrow_anchors_x)):
+            dist_points = [arrow_anchors_x[i],arrow_anchors_y[i]]
+            if (math.dist(dist_points, event_points) < closest):
+                closest = math.dist(dist_points, event_points)
+                line_points = dist_points
+        # Get closest entity
+       # item = main_canvas.find_closest(getX(), getY())[0]
+        lines.append(main_canvas.create_line(line_points[0], line_points[1], getX(), getY(), width=4, arrow=LAST))
+
+def dragArrow(event):
+    global arrowToggle
+    global lines
+    if arrowToggle:
+        main_canvas.coords(lines[-1], line_points[0], line_points[1], event.x, event.y)
+        print(main_canvas.coords(lines[-1]))
+
+
 def toolSwitchSelect():
     # Run when switch tool is selected
     global selectToggle
     global moveToggle
     global createToggle
+    global arrowToggle
     if selectToggle: # Turn select tool off
         selectOff()
 
     elif not selectToggle: # Turn select tool on, turn all others off
         moveOff()
         createOff()
+        arrowOff()
         selectOn()
 
 def toolSwitchMove():
@@ -187,12 +264,13 @@ def toolSwitchMove():
     global selectToggle
     global moveToggle
     global createToggle
+    global arrowToggle
     if moveToggle: # Turn move tool off
         moveOff()
-
     elif not moveToggle: # Turn move tool on, turn all others off
         selectOff()
         createOff()
+        arrowOff()
         moveOn()
 
 def toolSwitchCreate():
@@ -200,12 +278,28 @@ def toolSwitchCreate():
     global selectToggle
     global moveToggle
     global createToggle
+    global arrowToggle
     if createToggle: # Turn create tool off
         createOff()
     elif not createToggle:
         selectOff()
         moveOff()
+        arrowOff()
         createOn()
+
+def toolSwitchArrow():
+    # Run when arrow tool is selected
+    global selectToggle
+    global moveToggle
+    global createToggle
+    global arrowToggle
+    if arrowToggle: # Turn arrow tool off
+        arrowOff()
+    elif not arrowToggle:
+        selectOff()
+        moveOff()
+        createOff()
+        arrowOn()
         
 def selectOn():
     global selectToggle
@@ -236,6 +330,16 @@ def createOff():
     global createToggle
     createBtn.config(bg='grey')
     createToggle = False
+
+def arrowOn():
+    global arrowToggle
+    arrowBtn.config(bg='green')
+    arrowToggle = True
+    
+def arrowOff():
+    global arrowToggle
+    arrowBtn.config(bg='grey')
+    arrowToggle = False
     
 # create GUI
 root = Tk()
@@ -288,11 +392,13 @@ rpw = ttk.PanedWindow(orient='vertical')
 # Load visual assets for buttons
 simg = Image.open('assets/cursor-png-1127.png').resize((30,30))
 mimg = Image.open('assets/Move_icon.svg.png').resize((30,30))
+aimg = Image.open('assets/Arrow.png').resize((30,30))
 
 # Set default state of tools
 selectToggle = False
 moveToggle = False
 createToggle = False
+arrowToggle = False
 
 # Create toolbox
 toolBox = Frame(root, bd=1, relief=SUNKEN)   
@@ -306,6 +412,9 @@ createImage = PhotoImage(width=1,height=1) # Create invisible 1x1 image
 createBtn = Button(toolBox, relief=FLAT, text='CREATE', bg='grey', command=toolSwitchCreate, image=createImage, width=30, height=30, compound=LEFT)
 createBtn['font'] = font.Font(size=6)
 createBtn.pack(side=LEFT, padx=2, pady=2)
+arrowImg = ImageTk.PhotoImage(aimg)
+arrowBtn = Button(toolBox, relief=FLAT, text='ARROW', bg='grey', command=toolSwitchArrow, image=arrowImg)
+arrowBtn.pack(side=LEFT, padx=2, pady=2)
 toolBox.pack(side=TOP, fill=X)
 lpw.add(toolBox)
 
@@ -329,7 +438,8 @@ pw.add(lpw)
 boximg = Image.open('assets/block-asset.png')
 box_image = ImageTk.PhotoImage(boximg)
 main_canvas = Canvas(root, height=550, bg="#9febed")
-main_canvas.bind("<Button-1>", toolCreate)
+main_canvas.bind("<Button-1>", runTool)
+main_canvas.bind("<B1-Motion>", dragArrow)
 #main_canvas.tag_bind(entity_tag, '<Button-1>', runTool, add=False)
 main_canvas.pack(side=RIGHT)
 rpw.add(main_canvas)
