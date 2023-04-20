@@ -4,6 +4,9 @@ from tkinter import *
 from tkinter import ttk
 import tkinter.font as font
 from PIL import Image, ImageTk # If you're getting an error at this line, please install the Pillow module -> https://pillow.readthedocs.io/en/stable/installation.html
+import win32api as win32 # pip install pywin32
+
+
 
 
 # Be able to use all 18 widgets in Tkinter 
@@ -17,6 +20,9 @@ from tkinter.messagebox import showinfo # For dialogue box
 entity_tag = "entity"
 
 selected_list = list()
+
+entities = []
+entity_no = 0
 
 def createFile():
     hi = 0
@@ -111,15 +117,30 @@ def runTool(event):
     if selectToggle:
         toolSelect(event)
     elif moveToggle:
-        toolMove(event)
-    # elif createToggle:
-    #     toolCreate(event)
+        toolMove()
+    elif createToggle:
+        toolCreate(event)
 
+def getX():
+    x = main_canvas.winfo_pointerx()
+    return x - main_canvas.winfo_rootx()
+
+def getY():
+    y = main_canvas.winfo_pointery()
+    return y - main_canvas.winfo_rooty()
+
+# Unnecessary for moving individual items
 def toolSelect(event):
+    global item
+    print("event x: ", getX(), "event y: ", getY())
+    item = main_canvas.find_closest(getX(), getY())[0]
+    print("closest item: ", main_canvas.gettags(item))
     print('Got object click', event.x, event.y)
 
-def toolMove(event):
-    hi=0
+def toolMove():
+    item = main_canvas.find_closest(getX(), getY())[0]
+    main_canvas.move(item, getX() - main_canvas.coords(item)[0] - 100, getY() - main_canvas.coords(item)[1] - 50)
+    #print("moved item to ", getX(), "  ", getY())
 
 def toolCreate(event):
     """Contains the functions for the creation tool
@@ -131,16 +152,18 @@ def toolCreate(event):
     # main_canvas.create_rectangle(event.x, event.y, event.x+80, event.y+80, width=4, fill='white')
     global createToggle
     global entity_tag
+    global entity_no
     
     if createToggle: # Run the creation tool if it's enabled
-        
+        entity_no = entity_no + 1
         entity = Frame(main_canvas, relief=RIDGE, borderwidth=2)
         entity_label = Label(entity, text='ENTITY NAME: ', justify=LEFT)
         entity_label.pack(side=LEFT, fill=X)
         entity_entry = Entry(entity)
         entity_entry.pack(side=LEFT, fill=X)
         
-        main_canvas.create_window(event.x, event.y, window=entity, anchor=NW, width=200, height=100, tags=entity_tag)
+        entity_item = main_canvas.create_window(event.x-100, event.y-50, window=entity, anchor=NW, width=200, height=100, tags=entity_tag+str(entity_no))
+        entities.append(entity_item)
         entity.bind('<Button-1>', runTool)
         entity.bind('<B1-Motion>', runTool)
         
@@ -307,7 +330,7 @@ boximg = Image.open('assets/block-asset.png')
 box_image = ImageTk.PhotoImage(boximg)
 main_canvas = Canvas(root, height=550, bg="#9febed")
 main_canvas.bind("<Button-1>", toolCreate)
-main_canvas.tag_bind(entity_tag, '<Button-1>', runTool, add=False)
+#main_canvas.tag_bind(entity_tag, '<Button-1>', runTool, add=False)
 main_canvas.pack(side=RIGHT)
 rpw.add(main_canvas)
 
