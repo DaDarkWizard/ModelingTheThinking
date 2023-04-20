@@ -149,22 +149,14 @@ def toolMove():
 
     # If the closest item is a window (entity), move it. Otherwise, do nothing
     if (main_canvas.type(item) == 'window'):
-        ent_x = main_canvas.coords(item)[0]
-        ent_y = main_canvas.coords(item)[1]
-        item_anchors_x = [ent_x - 100, ent_x, ent_x + 100, ent_x]
-        item_anchors_y = [ent_y, ent_y - 50, ent_y, ent_y + 50]
-        x_vals = [100, 0, 0, -100]
-        y_vals = [0, 50, -50, 0]
         #print("lines: ", len(lines), ", anchors_x: ", len(item_anchors_x))
         # Find all arrows connected to object and move with the object (entity) as it moves
         # Currently only works on arrows connected to left and top anchor points, and will become disconnected if window moves too quickly
         for i in range(len(lines)):
-            for j in range(len(item_anchors_x)):
-                #print("line start x: ", main_canvas.coords(lines[i])[0], ", anchor x: ", item_anchors_x[j], ", line start y: ", main_canvas.coords(lines[i])[1], ", anchor y: ", item_anchors_y[j])
-                if (main_canvas.coords(lines[i])[0] == item_anchors_x[j] and main_canvas.coords(lines[i])[1] == item_anchors_y[j]):
-                    #print("positive at j ", j)
-                    #print("positive anchor at x: ", main_canvas.coords(item)[0]+x_vals[j], ", ", main_canvas.coords(item)[1]+y_vals[j])
-                    main_canvas.coords(lines[i], getX()+x_vals[j], getY()+y_vals[j], main_canvas.coords(lines[i])[2], main_canvas.coords(lines[i])[3])
+            if (lines[i][0] == main_canvas.gettags(item)[0]):
+                main_canvas.coords(lines[i][1], main_canvas.coords(item)[0]+lines[i][2][0], main_canvas.coords(item)[1]+lines[i][2][1], main_canvas.coords(lines[i][1])[2], main_canvas.coords(lines[i][1])[3])
+            #print(lines[i])
+        #print(lines[0][1])
         #print("anchors: ", ent_x - 100, ent_y, ent_x, ent_y - 50, ent_x + 100, ent_y, ent_x, ent_y + 50)
         main_canvas.move(item, getX() - main_canvas.coords(item)[0] - 100, getY() - main_canvas.coords(item)[1] - 50)
         tag = main_canvas.gettags(item)[0]
@@ -208,8 +200,8 @@ def toolCreate(event):
         #print("populated anchor points: ", event.x-100, event.y, event.x, event.y-50, event.x+100, event.y, event.x, event.y+50)
 
         # Create anchor points for relation arrows to attach to
-        arrow_anchors_x.extend([event.x-100, event.x, event.x+100, event.x])
-        arrow_anchors_y.extend([event.y, event.y-50, event.y, event.y+50])
+        arrow_anchors_x.extend([entity_item, event.x-100, event.x, event.x+100, event.x])
+        arrow_anchors_y.extend([entity_item, event.y, event.y-50, event.y, event.y+50])
 
         entities.append(entity_item)
         entity.bind('<Button-1>', runTool)
@@ -232,9 +224,13 @@ def toolRelation(event):
             if (math.dist(dist_points, event_points) < closest):
                 closest = math.dist(dist_points, event_points)
                 line_points = dist_points
+                print(line_points, "... ", closest, "... ", dist_points, "... ", event_points)
+                #print("relatives: ", rel_x, ", ", rel_y)
         # Get closest entity
-       # item = main_canvas.find_closest(getX(), getY())[0]
-        lines.append(main_canvas.create_line(line_points[0], line_points[1], getX(), getY(), width=4, arrow=LAST))
+        item = main_canvas.find_closest(getX(), getY())[0]
+        relative = [line_points[0]-main_canvas.coords(item)[0], line_points[1]-main_canvas.coords(item)[1]]
+        print("line: ", line_points, "... item: ", main_canvas.coords(item))
+        lines.append([main_canvas.gettags(item)[0], main_canvas.create_line(line_points[0], line_points[1], getX(), getY(), width=4, arrow=LAST), relative])
 
 def dragArrow(event):
     global arrowToggle
