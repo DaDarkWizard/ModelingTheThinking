@@ -4,7 +4,6 @@ from tkinter import *
 from tkinter import ttk
 import tkinter.font as font
 import math
-import time
 from PIL import Image, ImageTk # If you're getting an error at this line, please install the Pillow module -> https://pillow.readthedocs.io/en/stable/installation.html
 
 # Be able to use all 18 widgets in Tkinter 
@@ -25,6 +24,11 @@ arrow_anchors_x = []
 arrow_anchors_y = []
 lines = []
 line_points = []
+
+auto_create_x = 100
+auto_create_y = 50
+increment_x_coord = 50
+increment_y_coord = 25
 
 def createFile():
     hi = 0
@@ -55,18 +59,25 @@ def browseFiles():
         units = list(map(lambda y: y.name, list(parser.scope.units().values())))
         unitvalues = list(map(lambda z: z.value.to_string(), list(parser.scope.units().values())))
         modelfrags = list(map(lambda x: x.name, list(parser.scope.modelfragments().values())))
+        quantfuncs = list(map(lambda x: x.name, list(parser.scope.quantityfunctions().values())))
         for x in dims:
             bottom_tree.insert('dims', 'end', text=x)
+            toolCreate(0, True, 'Dimension', x)
         i = 0
         for x in units:
             i = i + 1
             bottom_tree.insert('units', 'end', i, text=x)
+            toolCreate(0, True, 'Unit', x)
         j = 0
         for x in unitvalues:
             j = j + 1
             bottom_tree.insert(j, 'end', text=x)
         for x in modelfrags:
             bottom_tree.insert('modelfrags','end', text=x)
+            toolCreate(0, True, 'Model Frag', x)
+        for x in quantfuncs:
+            bottom_tree.insert('quantfuncs', 'end', text=x)
+            toolCreate(0, True, 'Quantity Function', x)
     
 def saveFile():
     hi = 0
@@ -122,7 +133,7 @@ def runTool(event):
     elif moveToggle:
         toolMove()
     elif createToggle:
-        toolCreate(event)
+        toolCreate(event, 0, 0, 0)
     elif arrowToggle:
         toolRelation(event)
 
@@ -137,10 +148,10 @@ def getY():
 # Unnecessary for moving individual items
 def toolSelect(event):
     global item
-    print("event x: ", getX(), "event y: ", getY())
+    #print("event x: ", getX(), "event y: ", getY())
     item = main_canvas.find_closest(getX(), getY())[0]
-    print("closest item: ", main_canvas.gettags(item))
-    print('Got object click', event.x, event.y)
+    #print("closest item: ", main_canvas.gettags(item))
+    #print('Got object click', event.x, event.y)
 
 def toolMove():
     global arrow_anchors_x
@@ -161,7 +172,7 @@ def toolMove():
 
         # Move the anchor points of a window if it is moved so that arrows can be added in proper place
         pos = [tag_no*4-4, tag_no*4-3, tag_no*4-2, tag_no*4-1]
-        print(pos[0], pos[1], pos[2], pos[3])
+        #print(pos[0], pos[1], pos[2], pos[3])
         x_target = [getX()-100, getX(), getX()+100, getX()]
         y_target = [getY(), getY()-50, getY(), getY()+50]
         for a,b in zip(pos, x_target):
@@ -170,7 +181,7 @@ def toolMove():
             arrow_anchors_y[a] = b 
     #print("moved item to ", getX(), "  ", getY())
 
-def toolCreate(event):
+def toolCreate(event, from_file=False, type="", name=""):
     """Contains the functions for the creation tool
 
     Args:
@@ -183,14 +194,23 @@ def toolCreate(event):
     global entity_no
     global arrow_anchors_x
     global arrow_anchors_y
+    global auto_create_x
+    global auto_create_y
+    global increment_x_coord
+    global increment_y_coord
     
-    if createToggle: # Run the creation tool if it's enabled
+    if createToggle and not from_file: # Run the creation tool if it's enabled
         entity_no = entity_no + 1
         entity = Frame(main_canvas, relief=RIDGE, borderwidth=2)
+        entity_type = Label(entity, text='TYPE: ', justify=LEFT)
+        entity_type.pack(side=TOP, fill=X)
+        entity_entry1 = Entry(entity)
+        entity_entry1.pack(side=TOP, fill=X)
+
         entity_label = Label(entity, text='ENTITY NAME: ', justify=LEFT)
-        entity_label.pack(side=LEFT, fill=X)
-        entity_entry = Entry(entity)
-        entity_entry.pack(side=LEFT, fill=X)
+        entity_label.pack(side=TOP, fill=X)
+        entity_entry2 = Entry(entity)
+        entity_entry2.pack(side=TOP, fill=X)
         
         entity_item = main_canvas.create_window(event.x-100, event.y-50, window=entity, anchor=NW, width=200, height=100, tags=entity_tag+str(entity_no))
         #print("created entity at ", event.x-100, ", ", event.y-50)
@@ -204,36 +224,66 @@ def toolCreate(event):
         entity.bind('<Button-1>', runTool)
         entity.bind('<B1-Motion>', runTool)
         
-        print("Created Box")
+        #print("Created Box")
+    elif from_file:
+        entity_no = entity_no + 1
+        entity = Frame(main_canvas, relief=RIDGE, borderwidth=2)
+        entity_type = Label(entity, text='TYPE: ', justify=LEFT)
+        entity_type.pack(side=TOP, fill=X)
+        entity_entry1 = Entry(entity)
+        entity_entry1.insert(0, type)
+        entity_entry1.pack(side=TOP, fill=X)
+
+        entity_label = Label(entity, text='ENTITY NAME: ', justify=LEFT)
+        entity_label.pack(side=TOP, fill=X)
+        entity_entry2 = Entry(entity)
+        entity_entry2.insert(0, name)
+        entity_entry2.pack(side=TOP, fill=X)
+        
+        entity_item = main_canvas.create_window(auto_create_x - 100, auto_create_y - 50, window=entity, anchor=NW, width=200, height=100, tags=entity_tag+str(entity_no))
+        #print("created entity at ", event.x-100, ", ", event.y-50)
+        #print("populated anchor points: ", event.x-100, event.y, event.x, event.y-50, event.x+100, event.y, event.x, event.y+50)
+
+        # Create anchor points for relation arrows to attach to
+        arrow_anchors_x.extend([entity_item, auto_create_x-100, auto_create_x, auto_create_x+100, auto_create_x])
+        arrow_anchors_y.extend([entity_item, auto_create_y, auto_create_y-50, auto_create_y, auto_create_y+50])
+
+        entities.append(entity_item)
+        entity.bind('<Button-1>', runTool)
+        entity.bind('<B1-Motion>', runTool)
+
+        auto_create_x = auto_create_x + increment_x_coord
+        auto_create_y = auto_create_y + increment_y_coord
     
 def toolRelation(event):
     if arrowToggle:
-        global arrow_anchors_x
-        global arrow_anchors_y
-        global line_points
-        global lines
-        closest = 999
-        dist_points = []
-        event_points = [getX(), getY()]
-        # Get closest anchor point
-        for i in range(len(arrow_anchors_x)):
-            dist_points = [arrow_anchors_x[i],arrow_anchors_y[i]]
-            if (math.dist(dist_points, event_points) < closest):
-                closest = math.dist(dist_points, event_points)
-                line_points = dist_points
-                #print(line_points, "... ", closest, "... ", dist_points, "... ", event_points)
-        # Get closest entity
         item = main_canvas.find_closest(getX(), getY())[0]
-        relative = [line_points[0]-main_canvas.coords(item)[0], line_points[1]-main_canvas.coords(item)[1]]
-        print("line: ", line_points, "... item: ", main_canvas.coords(item))
-        lines.append([main_canvas.gettags(item)[0], main_canvas.create_line(line_points[0], line_points[1], getX(), getY(), width=4, arrow=LAST), relative])
+        if (main_canvas.type(item) == 'window'):
+            global arrow_anchors_x
+            global arrow_anchors_y
+            global line_points
+            global lines
+            closest = 999
+            dist_points = []
+            event_points = [getX(), getY()]
+            # Get closest anchor point
+            for i in range(len(arrow_anchors_x)):
+                dist_points = [arrow_anchors_x[i],arrow_anchors_y[i]]
+                if (math.dist(dist_points, event_points) < closest):
+                    closest = math.dist(dist_points, event_points)
+                    line_points = dist_points
+                    #print(line_points, "... ", closest, "... ", dist_points, "... ", event_points)
+            # Get closest entity
+            relative = [line_points[0]-main_canvas.coords(item)[0], line_points[1]-main_canvas.coords(item)[1]]
+            #print("line: ", line_points, "... item: ", main_canvas.coords(item))
+            lines.append([main_canvas.gettags(item)[0], main_canvas.create_line(line_points[0], line_points[1], getX(), getY(), width=4, arrow=LAST), relative])
 
 def dragArrow(event):
     global arrowToggle
     global lines
     if arrowToggle:
-        main_canvas.coords(lines[-1], line_points[0], line_points[1], event.x, event.y)
-        print(main_canvas.coords(lines[-1]))
+        main_canvas.coords(lines[-1][1], line_points[0], line_points[1], event.x, event.y)
+        #print(main_canvas.coords(lines[-1]))
 
 
 def toolSwitchSelect():
@@ -420,6 +470,7 @@ bottom_tree = ttk.Treeview(root)
 bottom_tree.insert("", 0, 'dims', text='Dimensions')
 bottom_tree.insert("", 'end', 'units', text='Units')
 bottom_tree.insert("", 'end', 'modelfrags', text='Model Fragments')
+bottom_tree.insert("", 'end', 'quantfuncs', text='Quantity Functions')
 bottom_tree.pack()
 lpw.add(bottom_tree)
 
@@ -429,17 +480,18 @@ pw.add(lpw)
 # Right Canvas to make up entire right side of window
 boximg = Image.open('assets/block-asset.png')
 box_image = ImageTk.PhotoImage(boximg)
-main_canvas = Canvas(root, height=550, bg="#9febed")
+main_canvas = Canvas(root, bg="#9febed", height=root.winfo_screenheight()-20)
 main_canvas.bind("<Button-1>", runTool)
 main_canvas.bind("<B1-Motion>", dragArrow)
 #main_canvas.tag_bind(entity_tag, '<Button-1>', runTool, add=False)
-main_canvas.pack(side=RIGHT)
+main_canvas.pack(side=TOP)
 rpw.add(main_canvas)
 
-right_text = Label(text="Additional Info (count of entities, etc) ?")
-right_text.pack(side=RIGHT)
-rpw.add(right_text)
-rpw.pack(fill=BOTH, expand=True)
+#info_frame = Frame()
+#right_text = Label(text="Additional Info (count of entities, etc) ?")
+#right_text.pack(side=BOTTOM)
+#rpw.add(right_text)
+#rpw.pack(fill=X)
 pw.add(rpw)
 
 # place the panedwindow on the root window
