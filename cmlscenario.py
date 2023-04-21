@@ -41,8 +41,12 @@ def parse_scenario(parser: CMLParser,
                 new_scenario.initially = get_next_parentheses_unit(stack)
 
             elif tok[1] == ":THROUGHOUT":
-                stack.pop()
-                new_scenario.throughout = get_next_parentheses_unit(stack)
+                throughs = get_next_parentheses_unit(stack)
+                throughs.pop()
+                throughs.pop(0)
+                while len(throughs) > 0:
+                    through = get_next_parentheses_unit(throughs)
+                    new_scenario.throughout.append(through)
 
             elif tok[1] == ":BOUNDARY":
                 new_scenario.boundary = get_next_parentheses_unit(stack)
@@ -58,5 +62,18 @@ def parse_scenario(parser: CMLParser,
 
         else:
             raise Exception("Unknown element in scenario definition.")
+    
+    if len(new_scenario.throughout) > 0:
+        for parse_list in new_scenario.throughout:
+            deps = []
+            for i in range(len(parse_list) - 1, -1, -1):
+                if parse_list[i][0] == TokenType.IDENTIFIER and\
+                   parse_list[i][1] in new_scenario.individuals.keys():
+                    deps.insert(0, parse_list[i][1])
+            if len(deps) > 1:
+                elem = deps.pop()
+                new_scenario.individuals[elem].depends.update(deps)
+                
+
 
     parser.scope.add_scenario(new_scenario)

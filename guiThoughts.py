@@ -60,24 +60,47 @@ def browseFiles():
         unitvalues = list(map(lambda z: z.value.to_string(), list(parser.scope.units().values())))
         modelfrags = list(map(lambda x: x.name, list(parser.scope.modelfragments().values())))
         quantfuncs = list(map(lambda x: x.name, list(parser.scope.quantityfunctions().values())))
+        scenarios = list(parser.scope.scenarios().values())
         for x in dims:
             bottom_tree.insert('dims', 'end', text=x)
-            toolCreate(0, True, 'Dimension', x)
+            # toolCreate(0, True, 'Dimension', x)
         i = 0
         for x in units:
             i = i + 1
             bottom_tree.insert('units', 'end', i, text=x)
-            toolCreate(0, True, 'Unit', x)
+            # toolCreate(0, True, 'Unit', x)
         j = 0
         for x in unitvalues:
             j = j + 1
             bottom_tree.insert(j, 'end', text=x)
         for x in modelfrags:
             bottom_tree.insert('modelfrags','end', text=x)
-            toolCreate(0, True, 'Model Frag', x)
+            # toolCreate(0, True, 'Model Frag', x)
         for x in quantfuncs:
             bottom_tree.insert('quantfuncs', 'end', text=x)
-            toolCreate(0, True, 'Quantity Function', x)
+            # toolCreate(0, True, 'Quantity Function', x)
+        for scenario in scenarios:
+            indivs = list(scenario.individuals.values())
+            for indiv in indivs:
+                toolCreate(0, True, indiv.type, indiv.name)
+            indivs.reverse()
+            for i in range(len(indivs)):
+                for dep in indivs[i].depends:
+                    for j in range(len(indivs)):
+                        if dep == indivs[j].name:
+                            item1 = entities[-1 - i]
+                            item2 = entities[-1 - j]
+                            coords1 = main_canvas.coords(item1)
+                            coords2 = main_canvas.coords(item2)
+                            line_points = [coords1[0] + 100, coords1[1], coords2[0] - 100, coords2[1]]
+                            relative = [0,
+                                        50,
+                                        200,
+                                        50]
+                            lines.append([main_canvas.gettags(item1)[0], main_canvas.gettags(item2)[0], main_canvas.create_line(line_points[0], line_points[1], line_points[2], line_points[3], width=4, arrow=LAST), relative])
+
+
+
     
 def saveFile():
     hi = 0
@@ -165,7 +188,15 @@ def toolMove():
         main_canvas.move(item, getX() - main_canvas.coords(item)[0] - 100, getY() - main_canvas.coords(item)[1] - 50)
         for i in range(len(lines)):
             if (lines[i][0] == main_canvas.gettags(item)[0]):
-                main_canvas.coords(lines[i][1], main_canvas.coords(item)[0]+lines[i][2][0], main_canvas.coords(item)[1]+lines[i][2][1], main_canvas.coords(lines[i][1])[2], main_canvas.coords(lines[i][1])[3])
+                main_canvas.coords(lines[i][2], main_canvas.coords(item)[0] + lines[i][3][0],
+                                                main_canvas.coords(item)[1] + lines[i][3][1],
+                                                main_canvas.coords(lines[i][2])[2],
+                                                main_canvas.coords(lines[i][2])[3])
+            elif (lines[i][1] == main_canvas.gettags(item)[0]):
+                main_canvas.coords(lines[i][2], main_canvas.coords(lines[i][2])[0],
+                                                main_canvas.coords(lines[i][2])[1],
+                                                main_canvas.coords(item)[0] + lines[i][3][2],
+                                                main_canvas.coords(item)[1] + lines[i][3][3])
 
         tag = main_canvas.gettags(item)[0]
         tag_no = int(''.join(x for x in tag if x.isdigit()))
@@ -217,8 +248,10 @@ def toolCreate(event, from_file=False, type="", name=""):
         #print("populated anchor points: ", event.x-100, event.y, event.x, event.y-50, event.x+100, event.y, event.x, event.y+50)
 
         # Create anchor points for relation arrows to attach to
-        arrow_anchors_x.extend([entity_item, event.x-100, event.x, event.x+100, event.x])
-        arrow_anchors_y.extend([entity_item, event.y, event.y-50, event.y, event.y+50])
+        # arrow_anchors_x.extend([entity_item, event.x-100, event.x, event.x+100, event.x])
+        # arrow_anchors_y.extend([entity_item, event.y, event.y-50, event.y, event.y+50])
+        arrow_anchors_x.extend([event.x-100, event.x, event.x+100, event.x])
+        arrow_anchors_y.extend([event.y, event.y-50, event.y, event.y+50])
 
         entities.append(entity_item)
         entity.bind('<Button-1>', runTool)
@@ -245,8 +278,10 @@ def toolCreate(event, from_file=False, type="", name=""):
         #print("populated anchor points: ", event.x-100, event.y, event.x, event.y-50, event.x+100, event.y, event.x, event.y+50)
 
         # Create anchor points for relation arrows to attach to
-        arrow_anchors_x.extend([entity_item, auto_create_x-100, auto_create_x, auto_create_x+100, auto_create_x])
-        arrow_anchors_y.extend([entity_item, auto_create_y, auto_create_y-50, auto_create_y, auto_create_y+50])
+        # arrow_anchors_x.extend([entity_item, auto_create_x-100, auto_create_x, auto_create_x+100, auto_create_x])
+        # arrow_anchors_y.extend([entity_item, auto_create_y, auto_create_y-50, auto_create_y, auto_create_y+50])
+        arrow_anchors_x.extend([auto_create_x-100, auto_create_x, auto_create_x+100, auto_create_x])
+        arrow_anchors_y.extend([auto_create_y, auto_create_y-50, auto_create_y, auto_create_y+50])
 
         entities.append(entity_item)
         entity.bind('<Button-1>', runTool)
@@ -271,20 +306,43 @@ def toolRelation(event):
                 dist_points = [arrow_anchors_x[i],arrow_anchors_y[i]]
                 if (math.dist(dist_points, event_points) < closest):
                     closest = math.dist(dist_points, event_points)
-                    line_points = dist_points
+                    line_points = [dist_points[0], dist_points[1], getX(), getY()]
                     #print(line_points, "... ", closest, "... ", dist_points, "... ", event_points)
             # Get closest entity
-            relative = [line_points[0]-main_canvas.coords(item)[0], line_points[1]-main_canvas.coords(item)[1]]
+            relative = [line_points[0]-main_canvas.coords(item)[0], line_points[1]-main_canvas.coords(item)[1], line_points[2], line_points[3]]
             #print("line: ", line_points, "... item: ", main_canvas.coords(item))
-            lines.append([main_canvas.gettags(item)[0], main_canvas.create_line(line_points[0], line_points[1], getX(), getY(), width=4, arrow=LAST), relative])
+            lines.append([main_canvas.gettags(item)[0], None, main_canvas.create_line(line_points[0], line_points[1], line_points[2], line_points[3], width=4, arrow=LAST), relative])
 
 def dragArrow(event):
     global arrowToggle
     global lines
     if arrowToggle:
-        main_canvas.coords(lines[-1][1], line_points[0], line_points[1], event.x, event.y)
+        line_points[2] = event.x
+        line_points[3] = event.y
+        main_canvas.coords(lines[-1][2], line_points[0], line_points[1], line_points[2], line_points[3])
         #print(main_canvas.coords(lines[-1]))
 
+def dropArrow(event):
+    global arrowToggle
+    global lines
+    if arrowToggle:
+        line_points[2] = event.x
+        line_points[3] = event.y
+        main_canvas.coords(lines[-1][2], line_points[0], line_points[1], line_points[2], line_points[3])
+        event_points = [event.x, event.y]
+        closest = 999
+        for i in range(len(arrow_anchors_x)):
+            dist_points = [arrow_anchors_x[i],arrow_anchors_y[i]]
+            if (math.dist(dist_points, event_points) < closest):
+                closest = math.dist(dist_points, event_points)
+                line_points[2] = dist_points[0]
+                line_points[3] = dist_points[1]
+        item = main_canvas.find_closest(line_points[2], line_points[3])[0]
+        
+        main_canvas.coords(lines[-1][2], line_points[0], line_points[1], line_points[2], line_points[3])
+        lines[-1][1] = main_canvas.gettags(item)[0]
+        lines[-1][3][2] = line_points[2]-main_canvas.coords(item)[0]
+        lines[-1][3][3] = line_points[3]-main_canvas.coords(item)[1]
 
 def toolSwitchSelect():
     # Run when switch tool is selected
@@ -483,6 +541,7 @@ box_image = ImageTk.PhotoImage(boximg)
 main_canvas = Canvas(root, bg="#9febed", height=root.winfo_screenheight()-20)
 main_canvas.bind("<Button-1>", runTool)
 main_canvas.bind("<B1-Motion>", dragArrow)
+main_canvas.bind("<B1-ButtonRelease>", dropArrow)
 #main_canvas.tag_bind(entity_tag, '<Button-1>', runTool, add=False)
 main_canvas.pack(side=TOP)
 rpw.add(main_canvas)

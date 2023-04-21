@@ -50,3 +50,18 @@ def get_lisp_quoted_list(stack):
         return (TokenType.NIL, None)
     ret_val.second = get_lisp_quoted_list(stack)
     return (TokenType.CONS, ret_val)
+
+def lisp_to_string(stack):
+    output = ""
+    while len(stack) > 0:
+        tok = stack.pop()
+        if tok[0] == TokenType.LEFT_PARENTHESES:
+            output += " ("
+        elif tok[0] == TokenType.RIGHT_PARENTHESES:
+            output += ") "
+        elif tok[0] == TokenType.STRING:
+            output += f' "{tok[1]}"'
+        elif tok[0] == TokenType.IDENTIFIER:
+            output += f' {tok[1]}'
+        else:
+            raise Exception(f"Unknown token type {tok[0]}")

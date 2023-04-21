@@ -138,9 +138,9 @@ class Scenario:
     def __init__(self, name: str):
         self.name = name
         self.documentation = ""
-        self.individuals = {}
+        self.individuals: Dict[any, CMLObject] = {}
         self.initially = None
-        self.throughout = None
+        self.throughout = []
         self.substitutions = None
         self.boundary = None
         self.addons = {}
@@ -152,3 +152,4 @@ class CMLObject:
         self.type = None
         self.quantities = {}
         self.addons = {}
+        self.depends = set()

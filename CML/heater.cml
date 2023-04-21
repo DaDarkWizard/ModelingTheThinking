@@ -1,0 +1,78 @@
+; Load all the dimension types in.
+(defDimension length-dimension)
+(defDimension mass-dimension)
+(defDimension time-dimension)
+(defDimension temperature-dimension)
+(defDimension electric-current-dimension)
+(defDimension luminous-dimension)
+
+; Add in some base units
+(defUnit meter :dimension length-dimension)
+(defUnit second :dimension time-dimension)
+(defUnit kelvin :dimension temperature-dimension)
+(defUnit ampere :dimension electric-current-dimension)
+(defUnit lumen :dimension luminous-dimension)
+(defUnit grams :dimension mass-dimension)
+
+; Set some constants
+(defConstantQuantity Pi := (acos -1))
+
+
+; Create some useful relations
+(defRelation celcius (?t ?c)
+    :=> (dimension ?t temperature-dimension)
+    :<=> (= ?c (- (magnitude ?t kelvin) 273.15))
+)
+
+(defEntity object
+    :quantities (
+        (temp :type temperature)
+    )
+)
+
+(defEntity sensor
+    :subclass-of (object)
+)
+
+(defEntity temp-sensor
+    :subclass-of (sensor)
+    :quantities (
+        (temp :type temperature)
+    )
+)
+
+(defEntity controller
+    :subclass-of (object)
+)
+
+(defEntity furnace-controller
+    :subclass-of (controller)
+)
+
+(defEntity heating-element
+    :subclass-of (object)
+)
+
+(defEntity room-air
+    :subclass-of (object)
+    :quantities (
+        (temp :type temperature)
+    )
+)
+
+; Furnace module
+(defScenario furnace-system
+    :documentation "A furnace system with a controller, temp sensor, and heating element."
+    :individuals (
+        (S :type temp-sensor)
+        (C :type furnace-controller)
+        (H :type heating-element)
+        (A :type room-air)
+    )
+    :throughout (
+        (touching S A)
+        (touching A H)
+        (reading-from C S)
+        (controlled-by H C)
+    )
+)
